@@ -1,0 +1,132 @@
+object Form1: TForm1
+  Left = 339
+  Height = 480
+  Top = 107
+  Width = 650
+  Caption = 'Form1'
+  ClientHeight = 480
+  ClientWidth = 650
+  Constraints.MinHeight = 480
+  Constraints.MinWidth = 650
+  LCLVersion = '3.99.0.0'
+  OnCreate = FormCreate
+  object ListBoxRecording: TListBox
+    Left = 0
+    Height = 192
+    Top = 288
+    Width = 650
+    Align = alBottom
+    ItemHeight = 0
+    TabOrder = 0
+  end
+  object GroupBox1: TGroupBox
+    Left = 8
+    Height = 258
+    Top = 8
+    Width = 270
+    Caption = 'Gazepoint Control'
+    ClientHeight = 238
+    ClientWidth = 266
+    TabOrder = 1
+    object ButtonConnect: TButton
+      Left = 8
+      Height = 50
+      Top = 8
+      Width = 120
+      Caption = 'Connect'
+      TabOrder = 0
+      OnClick = ButtonConnectClick
+    end
+    object ButtonDisconnect: TButton
+      Left = 136
+      Height = 50
+      Top = 8
+      Width = 120
+      Caption = 'Disconnect'
+      TabOrder = 1
+      OnClick = ButtonDisconnectClick
+    end
+    object ButtonStartCalibration: TButton
+      Left = 8
+      Height = 50
+      Top = 64
+      Width = 120
+      Caption = 'Start Calibration'
+      TabOrder = 2
+      OnClick = ButtonStartCalibrationClick
+    end
+    object ButtonStartRecording: TButton
+      Left = 8
+      Height = 50
+      Top = 120
+      Width = 120
+      Caption = 'Start Recording'
+      TabOrder = 3
+      OnClick = ButtonStartRecordingClick
+    end
+    object ButtonStopRecording: TButton
+      Left = 136
+      Height = 50
+      Top = 120
+      Width = 120
+      Caption = 'Stop Recording'
+      TabOrder = 4
+      OnClick = ButtonStopRecordingClick
+    end
+    object ButtonUserEvent: TButton
+      Left = 8
+      Height = 50
+      Top = 176
+      Width = 120
+      Caption = 'User Event'
+      TabOrder = 5
+      OnClick = ButtonUserEventClick
+    end
+  end
+  object GroupBox2: TGroupBox
+    Left = 288
+    Height = 258
+    Top = 8
+    Width = 272
+    Caption = 'Gazepoint Analysis'
+    ClientHeight = 238
+    ClientWidth = 268
+    TabOrder = 2
+    object ButtonConnectGazepointAnalysis: TButton
+      Left = 8
+      Height = 50
+      Top = 8
+      Width = 120
+      Caption = 'Connect'
+      TabOrder = 0
+      OnClick = ButtonConnectClick
+    end
+    object ButtonDisconnectGazepointAnalysis: TButton
+      Left = 136
+      Height = 50
+      Top = 8
+      Width = 120
+      Caption = 'Disconnect'
+      TabOrder = 1
+      OnClick = ButtonDisconnectClick
+    end
+    object ButtonStopRecordingGazepointAnalysis: TButton
+      Left = 136
+      Height = 50
+      Top = 120
+      Width = 120
+      Caption = 'Stop Recording'
+      TabOrder = 2
+      OnClick = ButtonStopRecordingClick
+    end
+    object ButtonStartRecordingGazepointAnalysis: TButton
+      Left = 8
+      Height = 50
+      Top = 120
+      Width = 120
+      Caption = 'Start Recording'
+      TabOrder = 3
+      OnClick = ButtonStartRecordingClick
+    end
+  end
+end
