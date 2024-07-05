@@ -13,20 +13,23 @@ Lazarus 3.99 (rev main_3_99-1082-g0bd3e44eb4) FPC 3.3.1 x86_64-win64-win32/win64
 
 ## Dependencies
 1. Synaser package;
-2. LCL package;
-3. TApplication queues
+1. LCL package;
+1. TApplication queues
+1. BGRABitmap
 
 ## Start up instructions
+1. Install Lazarus and FPC (I recommend [fpcupdeluxe](https://github.com/LongDirtyAnimAlf/fpcupdeluxe/))
 1. Open Lazarus and create a new Project/Application
-2. Add the Synaser package using the Project Inpector and Online Package Manager
-3. Make sure all units are visible in your project's settings path
+1. Add the Synaser package using the Project Inpector and Online Package Manager
+1. Make sure all units are visible in your project's settings path
 
 ## Main features
+- custom calibration for setups with a remote server
 - blocking and non-blocking alternatives for sending messages
 - event based approach for receiving messages
 - multi-thread (safe)
 
-## Exemples
+## Examples
 See `examples/client/` for a working compilable example.
 
 ## Code snippets
@@ -66,51 +69,71 @@ begin
 end;
 ```
 
-## Structure of source units, src/
-A base class for clients
-\src\opengaze.client.pas
+## Structure of source units in src/ and utils/
+A base class for clients   
+/src/opengaze.client.pas
 
-A class for Control clients
-\src\opengaze.control.pas
+A class for Control clients   
+/src/opengaze.control.pas
 
-A class for Analysis clients (not working yet)
-\src\opengaze.analysis.pas
+A class for Analysis clients (not working yet)   
+/src/opengaze.analysis.pas
 
-A wrapper for control and analysis instances
-\src\opengaze.pas
+A wrapper for control and analysis instances   
+/src/opengaze.pas
 
-A base class for Open Gaze commands
-\src\opengaze.base.pas
+A base class for Open Gaze commands   
+/src/opengaze.base.pas
 
-A class to encapsulate Open Gaze API recording commands
-\src\opengaze.recording.pas
+A class to encapsulate Open Gaze API recording commands   
+/src/opengaze.recording.pas
 
-A class to encapsulate Open Gaze API calibration commands
-\src\opengaze.calibration.pas
+A class to encapsulate Open Gaze API calibration commands   
+/src/opengaze.calibration.pas
 
-A class to encapsulate fpc-opengaze events
-\src\opengaze.events.pas
+A class to encapsulate fpc-opengaze events   
+/src/opengaze.events.pas
 
-A class to encapsulate the incoming thread logic
-\src\opengaze.incoming.pas
+A class to encapsulate the incoming thread logic   
+/src/opengaze.incoming.pas
 
-Convenience functions for parsing Open Gaze API commands.
-\src\opengaze.commands.pas
+Convenience functions for parsing Open Gaze API commands.   
+/src/opengaze.commands.pas
 
-Convenience constants for Open Gaze API tags, ids, parameters, ...
-\src\opengaze.constants.pas
+Convenience constants for Open Gaze API tags, ids, parameters, ...   
+/src/opengaze.constants.pas
 
-Convenience type convertion helpers
-\src\opengaze.helpers.pas
+Convenience type convertion helpers   
+/src/opengaze.helpers.pas
 
-A procedural logger
-\src\opengaze.logger.pas
+A procedural logger   
+/src/opengaze.logger.pas
 
-A procedural parser
-\src\opengaze.parser.pas
+A procedural parser   
+/src/opengaze.parser.pas
 
-A wrapper around Synaser TCP/IP block socket:
-\src\opengaze.socket.pas
+A wrapper around Synaser TCP/IP block socket:   
+/src/opengaze.socket.pas
 
-fpc-opengaze types
-\src\opengaze.types.pas
+fpc-opengaze types   
+/src/opengaze.types.pas
+
+BGRA easing animations used during calibration   
+/utils/animation.pas   
+/utils/easings.pas
+
+A wrapper around screen segmentation functions for calibration   
+/utils/choreographies.pas   
+/utils/screen.grids.pas   
+/utils/screen.helpers.pas   
+/utils/screen.lines.pas   
+/utils/windows.methods.pas
+
+A default calibration background/window   
+/utils/forms.background.pas
+
+A debug logger   
+/utils/windows.debugger.pas
+
+Monotonic timing   
+/utils/windows.timestamps.pas
