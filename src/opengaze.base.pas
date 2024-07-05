@@ -24,8 +24,10 @@ type
   { TOpenGazeBase }
 
   TOpenGazeBase = class
-  protected
+  private
     FSocket: TOpenGazeSocket;
+    function GetServer: TOpenGazeServer;
+  protected
     FEvents : TOpenGazeEvents;
     procedure SendCommand(Command: string; Blocking : Boolean = True);
     function RequestCommand(Command: string) : TPairsDictionary;
@@ -33,6 +35,7 @@ type
     constructor Create(ASocket: TOpenGazeSocket; AEvents: TOpenGazeEvents);
     property Socket : TOpenGazeSocket read FSocket;
     property Events : TOpenGazeEvents read FEvents;
+    property Server : TOpenGazeServer read GetServer;
   end;
 
 implementation
@@ -40,6 +43,11 @@ implementation
 uses opengaze.parser;
 
 { TOpenGazeBase }
+
+function TOpenGazeBase.GetServer: TOpenGazeServer;
+begin
+  Result := FSocket.Server;
+end;
 
 procedure TOpenGazeBase.SendCommand(Command: string; Blocking: Boolean);
 var

@@ -14,7 +14,7 @@ unit opengaze;
 interface
 
 uses
-  opengaze.control, opengaze.analysis;
+  opengaze.control, opengaze.analysis, opengaze.calibration.choreography;
 
 var
   OpenGazeControl  : TOpenGazeControlClient;
@@ -23,10 +23,12 @@ var
 implementation
 
 initialization
+  OpenGazeCalibrationChoreography := TOpenGazeCalibrationChoreography.Create;
   OpenGazeControl  := TOpenGazeControlClient.Create;
   OpenGazeAnalysis := TOpenGazeAnalysisClient.Create;
 
 finalization
+  OpenGazeCalibrationChoreography.Free;
   OpenGazeControl.Free;
   OpenGazeAnalysis.Free;
 

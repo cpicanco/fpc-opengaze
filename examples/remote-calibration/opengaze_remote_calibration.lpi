@@ -5,7 +5,7 @@
     <PathDelim Value="\"/>
     <General>
       <SessionStorage Value="InProjectDir"/>
-      <Title Value="opengaze_client"/>
+      <Title Value="opengaze_remote_calibration"/>
       <Scaled Value="True"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
@@ -21,10 +21,11 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="opengaze_client"/>
+            <Filename Value="opengaze_remote_calibration"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="..\..\src;..\..\utils;..\..\translated"/>
             <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Linking>
@@ -65,13 +66,14 @@
     </RequiredPackages>
     <Units>
       <Unit>
-        <Filename Value="opengaze_client.lpr"/>
+        <Filename Value="opengaze_remote_calibration.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="forms.main.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit>
     </Units>
@@ -80,11 +82,11 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="opengaze_client"/>
+      <Filename Value="opengaze_remote_calibration"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\..\src;..\..\utils"/>
+      <OtherUnitFiles Value="..\..\src;..\..\utils;..\..\translated"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

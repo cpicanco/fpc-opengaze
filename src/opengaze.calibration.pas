@@ -18,7 +18,9 @@ uses
   opengaze.base,
   opengaze.socket,
   opengaze.events,
-  opengaze.types;
+  opengaze.types,
+  opengaze.calibration.points,
+  opengaze.calibration.choreography;
 
 type
 
@@ -27,11 +29,18 @@ type
   // A wrapper around outgoing calibration messages
   TOpenGazeCalibration = class(TOpenGazeBase)
     private
+      FChoreography : TOpenGazeCalibrationChoreography;
+      FPoints: TOpenGazeCalibrationPoints;
       function GetOnResult: TOpenGazeEvent;
       function GetOnResultSummary: TOpenGazeEvent;
+      function GetRemote: Boolean;
       function GetStarted: Boolean;
+      procedure SetChoreography(AValue: TOpenGazeCalibrationChoreography);
       procedure SetOnResult(AValue: TOpenGazeEvent);
       procedure SetOnResultSummary(AValue: TOpenGazeEvent);
+      procedure SetRemote(AValue: Boolean);
+      procedure StartPointAnimation(Sender : TObject; Event : TPairsDictionary);
+      procedure EndPointTimeout(Sender : TObject; Event : TPairsDictionary);
     public
       constructor Create(ASocket : TOpenGazeSocket; AEvents : TOpenGazeEvents);
       destructor Destroy; override;
@@ -39,16 +48,21 @@ type
       procedure Hide(Blocking : Boolean = True);
       procedure Start(Blocking : Boolean = True);
       procedure Stop(Blocking : Boolean = True);
-      procedure Clear(Blocking : Boolean = True);
       function ResultSummary : string;
+      function PointDelay : string;
+      function PointDuration : string;
       property Started : Boolean read GetStarted;
       property OnResult : TOpenGazeEvent read GetOnResult write SetOnResult;
       property OnResultSummary : TOpenGazeEvent read GetOnResultSummary write SetOnResultSummary;
+      property Points : TOpenGazeCalibrationPoints read FPoints;
+      property Choreography : TOpenGazeCalibrationChoreography read FChoreography write SetChoreography;
+      property UseCustomChoreography : Boolean read GetRemote write SetRemote;
+
   end;
 
 implementation
 
-uses OpenGaze.constants, OpenGaze.commands;
+uses opengaze.constants, opengaze.commands, opengaze.helpers, choreographies;
 
 { TOpenGazeCalibration }
 
@@ -62,6 +76,13 @@ begin
   finally
     Dictionary.Free;
   end;
+end;
+
+procedure TOpenGazeCalibration.SetChoreography(
+  AValue: TOpenGazeCalibrationChoreography);
+begin
+  if FChoreography = AValue then Exit;
+  FChoreography := AValue;
 end;
 
 function TOpenGazeCalibration.GetOnResult: TOpenGazeEvent;
@@ -80,6 +101,11 @@ begin
   end;
 end;
 
+function TOpenGazeCalibration.GetRemote: Boolean;
+begin
+  Result := FChoreography.Animation.WaitForRemote;
+end;
+
 procedure TOpenGazeCalibration.SetOnResult(AValue: TOpenGazeEvent);
 begin
   if FEvents = nil then Exit;
@@ -94,40 +120,91 @@ begin
   FEvents.OnCalibrationResultSummary := AValue;
 end;
 
+procedure TOpenGazeCalibration.SetRemote(AValue: Boolean);
+begin
+  if FChoreography.Animation.WaitForRemote = AValue then Exit;
+  FChoreography.Animation.WaitForRemote := AValue;
+end;
+
+procedure TOpenGazeCalibration.StartPointAnimation(Sender: TObject;
+  Event: TPairsDictionary);
+begin
+  FChoreography.Animation.StartPointAnimation;
+end;
+
+procedure TOpenGazeCalibration.EndPointTimeout(Sender: TObject;
+  Event: TPairsDictionary);
+begin
+  FChoreography.Animation.EndPointTimeout;
+end;
+
 constructor TOpenGazeCalibration.Create(ASocket: TOpenGazeSocket;
   AEvents: TOpenGazeEvents);
 begin
   inherited Create(ASocket, AEvents);
+  FEvents.OnCalibrationPointStart := nil;
+  FEvents.OnCalibrationPointResult := nil;
+  FPoints := TOpenGazeCalibrationPoints.Create(ASocket, AEvents);
+
+  FChoreography := OpenGazeCalibrationChoreography;
 end;
 
 destructor TOpenGazeCalibration.Destroy;
 begin
+  FPoints.Free;
   inherited Destroy;
 end;
 
 procedure TOpenGazeCalibration.Show(Blocking: Boolean);
+var
+  NormalizedPoints : TNormalizedPoints;
+  Point : TNormalizedPoint;
 begin
-  SendCommand(Calibration.Show, Blocking);
+  if UseCustomChoreography then begin
+    Points.Delay := 1.2;
+    Points.Clear;
+
+    FChoreography.Animation.Delay := PointDelay.ToTimeInteger-2500000;
+    FChoreography.Animation.Duration := PointDuration.ToTimeInteger;
+
+    NormalizedPoints := FChoreography.GetPoints;
+    for Point in NormalizedPoints do begin
+      Points.Add(Point.X, Point.Y);
+    end;
+
+    FChoreography.Show;
+  end else begin
+    SendCommand(Calibration.Show, Blocking);
+  end;
 end;
 
 procedure TOpenGazeCalibration.Hide(Blocking: Boolean);
 begin
-  SendCommand(Calibration.Hide, Blocking);
+  if UseCustomChoreography then begin
+    FChoreography.Hide;
+  end else begin
+    SendCommand(Calibration.Hide, Blocking);
+  end;
 end;
 
 procedure TOpenGazeCalibration.Start(Blocking: Boolean);
 begin
+  if UseCustomChoreography then begin
+    FEvents.OnCalibrationPointStart := @StartPointAnimation;
+    FEvents.OnCalibrationPointResult := @EndPointTimeout;
+  end else begin
+    FEvents.OnCalibrationPointStart := nil;
+    FEvents.OnCalibrationPointResult := nil;
+  end;
   SendCommand(Calibration.Start, Blocking);
 end;
 
 procedure TOpenGazeCalibration.Stop(Blocking: Boolean);
 begin
   SendCommand(Calibration.Stop, Blocking);
-end;
-
-procedure TOpenGazeCalibration.Clear(Blocking: Boolean);
-begin
-  SendCommand(Calibration.Clear, Blocking);
+  if UseCustomChoreography then begin
+    FChoreography.Stop;
+  end;
 end;
 
 function TOpenGazeCalibration.ResultSummary: string;
@@ -137,6 +214,30 @@ begin
   Dictionary := RequestCommand(Calibration.ResultSummary);
   try
     Result := Dictionary[AVE_ERROR];
+  finally
+    Dictionary.Free;
+  end;
+end;
+
+function TOpenGazeCalibration.PointDelay: string;
+var
+  Dictionary : TPairsDictionary;
+begin
+  Dictionary := RequestCommand(Calibration.GetDelay);
+  try
+    Result := Dictionary[VALUE];
+  finally
+    Dictionary.Free;
+  end;
+end;
+
+function TOpenGazeCalibration.PointDuration: string;
+var
+  Dictionary : TPairsDictionary;
+begin
+  Dictionary := RequestCommand(Calibration.GetTimeOut);
+  try
+    Result := Dictionary[VALUE];
   finally
     Dictionary.Free;
   end;

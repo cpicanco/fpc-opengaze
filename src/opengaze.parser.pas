@@ -16,10 +16,11 @@ interface
 uses opengaze.constants, opengaze.types;
 
 function ParseXML(const InputString: string): TRawTag;
-function ParseStr(const ClientTag: string;
+function ParseStr(const ATag: string;
   AID: string; Values: TPairsDictionary = nil): string; overload;
-function ParseStr(const ClientTag: string;
+function ParseStr(const ATag: string;
   AID: string; Values: array of string): string; overload;
+function ParseStr(const ATag: TOpenGazeTag; Values: TTagPairs): string; overload;
 function TagPairsToDict(const TagPairs : TTagPairs): TPairsDictionary;
 
 implementation
@@ -76,6 +77,33 @@ begin
   end;
 end;
 
+function ParseStr(const ATag: TOpenGazeTag; Values: TTagPairs): string;
+var
+  i : integer;
+  LTag : string;
+begin
+  WriteStr(LTag, ATag);
+  // Create the start of the formatted string.
+  Result := Concat(
+    XMLStart,
+    LTag.Replace('_', ''),
+    AttributeDelimiter);
+
+  // Add the values for each parameter.
+  for i := Low(Values) to High(Values) do begin
+    Result := Concat(
+      Result,
+      Values[i].Key,
+      ParameterDelimiter,
+      ValueDelimiter,
+      Values[i].Value,
+      ValueDelimiter,
+      AttributeDelimiter);
+  end;
+
+  Result := Result + XMLSlashEnd + LineEnding;
+end;
+
 function TagPairsToDict(const TagPairs: TTagPairs): TPairsDictionary;
 var
   Pair : TTagPair;
@@ -86,7 +114,7 @@ begin
   end;
 end;
 
-function ParseStr(const ClientTag: string; AID: string;
+function ParseStr(const ATag: string; AID: string;
   Values: TPairsDictionary): string;
 var
   Parameter: string;
@@ -94,7 +122,7 @@ begin
   // Create the start of the formatted string.
   Result := Concat(
     XMLStart,
-    ClientTag,
+    ATag,
     AttributeDelimiter,
     ID,
     ParameterDelimiter,
@@ -120,7 +148,7 @@ begin
   Result := Concat(Result, XMLSlashEnd, LineEnding);
 end;
 
-function ParseStr(const ClientTag: string; AID: string;
+function ParseStr(const ATag: string; AID: string;
   Values: array of string): string;
 var
   i : integer;
@@ -128,7 +156,7 @@ begin
   // Create the start of the formatted string.
   Result := Concat(
     XMLStart,
-    ClientTag,
+    ATag,
     AttributeDelimiter,
     ID,
     ParameterDelimiter,
@@ -166,10 +194,12 @@ begin
   RawTag := ParseXML(InputString);
 
   // Display parsed tag information
+  WriteLn('opengaze.parser');
   WriteLn('Tag:', RawTag.Tag);
   WriteLn('Attributes:');
   for Pair in RawTag.Pairs do
     WriteLn(Pair.Key, ' = ', Pair.Value);
+  WriteLn('---------------------------------------------------');
 end;
 
 initialization

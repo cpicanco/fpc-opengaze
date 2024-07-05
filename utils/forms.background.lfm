@@ -1,0 +1,11 @@
+object FormBackground: TFormBackground
+  Left = 608
+  Height = 240
+  Top = 198
+  Width = 320
+  BorderStyle = bsNone
+  Caption = 'FormBackground'
+  Color = clBlack
+  LCLVersion = '3.99.0.0'
+  WindowState = wsFullScreen
+end

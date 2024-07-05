@@ -53,7 +53,7 @@ const
   XCOORDENATE = 'X';
   YCOORDENATE = 'Y';
   AVE_ERROR = 'AVE_ERROR';  // Parameter type: Numeric
-
+  PT = 'PT';
   USER_DATA = 'USER_DATA'; // Value of ID parameter
   TRACKER_DISPLAY = 'TRACKER_DISPLAY'; // Value of ID parameter
   TIME_TICK_FREQUENCY = 'TIME_TICK_FREQUENCY'; // Value of ID parameter

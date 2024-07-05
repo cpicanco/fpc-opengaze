@@ -30,11 +30,13 @@ type
     FConnected : Boolean;
     FIP: string;
     FPort: string;
-    FLastBlockingRawTag: TRawTag;
+    FIsBlocked : Boolean;
+    FLastBlockedRawTag: TRawTag;
     function GetConnected: Boolean;
-    function GetLastBlockingRawTag: TRawTag;
+    function GetIsBlocked: Boolean;
     procedure SeTOpenGazeServer(AValue: TOpenGazeServer);
-    procedure SetLastBlockingRawTag(AValue: TRawTag);
+    procedure SetIsBlocked(AValue: Boolean);
+    function Block(TimeOut : integer) : TWaitResult;
   public
     constructor Create;
     destructor Destroy; override;
@@ -43,14 +45,15 @@ type
     procedure Send(Command : string); overload;
     procedure Request(Command : string; var Reply : TRawTag;
       Timeout : Integer = MaxInt); overload;
-    function Receive(Timeout : Integer = MaxInt) : TRawTag;
+    function Receive(Timeout: Integer = MaxInt): string;
     property IP: string read FIP write FIP;
     property Port: string read FPort write FPort;
     property Lock: TCriticalSection read FLock;
     property Event: TEvent read FEvent write FEvent;
-    property LastBlockingRawTag : TRawTag read GetLastBlockingRawTag write SetLastBlockingRawTag;
+    property IsBlocked : Boolean read GetIsBlocked;
     property Connected: Boolean read GetConnected;
     property Server : TOpenGazeServer read FOpenGazeServer write SeTOpenGazeServer;
+    property LastBlockedRawTag : TRawTag read FLastBlockedRawTag write FLastBlockedRawTag;
   end;
 
 
@@ -70,11 +73,11 @@ begin
   end;
 end;
 
-function TOpenGazeSocket.GetLastBlockingRawTag: TRawTag;
+function TOpenGazeSocket.GetIsBlocked: Boolean;
 begin
   FLock.Acquire;
   try
-    Result := FLastBlockingRawTag;
+    Result := FIsBlocked;
   finally
     FLock.Release;
   end;
@@ -91,13 +94,23 @@ begin
   end;
 end;
 
-procedure TOpenGazeSocket.SetLastBlockingRawTag(AValue: TRawTag);
+procedure TOpenGazeSocket.SetIsBlocked(AValue: Boolean);
 begin
   FLock.Acquire;
   try
-    FLastBlockingRawTag := AValue;
+    FIsBlocked := AValue;
   finally
     FLock.Release;
+  end;
+end;
+
+function TOpenGazeSocket.Block(TimeOut: integer): TWaitResult;
+begin
+  SetIsBlocked(True);
+  try
+    Result := Event.WaitFor(Timeout);
+  finally
+    SetIsBlocked(False);
   end;
 end;
 
@@ -154,26 +167,35 @@ end;
 
 procedure TOpenGazeSocket.Send(Command: string);
 begin
+  {$IFDEF DEBUG}
+  WriteLn(Command);
+  {$ENDIF}
   FTCP.SendString(Command);
 end;
 
 procedure TOpenGazeSocket.Request(Command: string; var Reply: TRawTag;
   Timeout: Integer);
 begin
+  {$IFDEF DEBUG}
+  Write(Command);
+  {$ENDIF}
   FTCP.SendString(Command);
   FLock.Acquire;
   try
-    FLastBlockingRawTag := ParseXML(Command);
+    FLastBlockedRawTag := ParseXML(Command);
   finally
     FLock.Release;
   end;
 
-  case FEvent.WaitFor(Timeout) of
+  case Block(Timeout) of
     wrSignaled : begin
       FLock.Acquire;
       try
-        Reply := FLastBlockingRawTag;
-        FLastBlockingRawTag := Default(TRawTag);
+        Reply := FLastBlockedRawTag;
+        {$IFDEF DEBUG}
+        Write(ParseStr(Reply.Tag, Reply.Pairs));
+        {$ENDIF}
+        FLastBlockedRawTag := Default(TRawTag);
       finally
         FLock.Release;
       end;
@@ -194,9 +216,10 @@ begin
   FEvent.ResetEvent;
 end;
 
-function TOpenGazeSocket.Receive(Timeout: Integer): TRawTag;
+function TOpenGazeSocket.Receive(Timeout: Integer): string;
 begin
-  Result := ParseXML(FTCP.RecvString(Timeout));
+  Result := '';
+  Result := FTCP.RecvPacket(Timeout);
 end;
 
 end.

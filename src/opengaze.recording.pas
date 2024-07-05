@@ -101,7 +101,7 @@ end;
 
 function TOpenGazeRecording.GetStartCommand: string;
 begin
-  case FSocket.Server of
+  case Server of
     OpenGazeControlServer  : Result := Recording.EnableSendData;
     OpenGazeAnalysisServer : Result := RecordingOpenGazeAnalysis.Start;
   end;
@@ -109,7 +109,7 @@ end;
 
 function TOpenGazeRecording.GetStopCommand: string;
 begin
-  case FSocket.Server of
+  case Server of
     OpenGazeControlServer  : Result := Recording.DisableSendData;
     OpenGazeAnalysisServer : Result := RecordingOpenGazeAnalysis.Stop;
   end;
@@ -119,7 +119,6 @@ procedure TOpenGazeRecording.Send(DoEnable, Blocking: Boolean);
 var
   Command : string;
 begin
-  if FSocket = nil then Exit;
   ParseSendCommands;
 
   if DoEnable then begin
@@ -136,7 +135,7 @@ var
   Command : string;
 begin
   for Command in Concat(EnabledCommands, DisabledCommands) do begin
-    FSocket.Send(Command);
+    SendCommand(Command);
   end;
 end;
 

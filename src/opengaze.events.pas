@@ -26,6 +26,8 @@ type
   TOpenGazeEvents = class
     private
       FIncomingThread : TIncomingThread;
+      FOnCalibrationPointResult: TOpenGazeEvent;
+      FOnCalibrationPointStart: TOpenGazeEvent;
       FOnCalibrationResult: TOpenGazeEvent;
       FOnCalibrationResultSummary: TOpenGazeEvent;
       FOnDisableSendData: TOpenGazeEvent;
@@ -35,6 +37,8 @@ type
       FOnStartRecording: TOpenGazeEvent;
       FOnStopRecording: TOpenGazeEvent;
       procedure SetIncomingThread(AValue: TIncomingThread);
+      procedure SetOnCalibrationPointResult(AValue: TOpenGazeEvent);
+      procedure SetOnCalibrationPointStart(AValue: TOpenGazeEvent);
       procedure SetOnCalibrationResult(AValue: TOpenGazeEvent);
       procedure SetOnCalibrationResultSummary(AValue: TOpenGazeEvent);
       procedure SetOnDisableSendData(AValue: TOpenGazeEvent);
@@ -54,6 +58,8 @@ type
       property OnStartRecording : TOpenGazeEvent read FOnStartRecording write SetOnStartRecording;
       property OnStopRecording : TOpenGazeEvent read FOnStopRecording write SetOnStopRecording;
       property OnEnableSendData : TOpenGazeEvent read FOnEnableSendData write SetOnEnableSendData;
+      property OnCalibrationPointStart : TOpenGazeEvent read FOnCalibrationPointStart write SetOnCalibrationPointStart;
+      property OnCalibrationPointResult : TOpenGazeEvent read FOnCalibrationPointResult write SetOnCalibrationPointResult;
       property OnDisableSendData : TOpenGazeEvent read FOnDisableSendData write SetOnDisableSendData;
       property OnDataReceived : TGazeDataEvent read FOnDataReceived write SetOnDataReceived;
   end;
@@ -108,6 +114,18 @@ begin
       Dictionary := TagPairsToDict(RawTag.Pairs);
       try
         case RawTag.ID of
+          CALIB_START_PT: begin
+            if Assigned(OnCalibrationPointStart) then begin
+              OnCalibrationPointStart(Self, Dictionary);
+            end;
+          end;
+
+          CALIB_RESULT_PT: begin
+            if Assigned(OnCalibrationPointResult) then begin
+              OnCalibrationPointResult(Self, Dictionary);
+            end;
+          end;
+
           CALIB_RESULT : begin
             if Assigned(OnCalibrationResult) then begin
               OnCalibrationResult(Self, Dictionary);
@@ -145,6 +163,18 @@ begin
   if FIncomingThread = AValue then Exit;
   FIncomingThread := AValue;
   FIncomingThread.OnReceive := @ProcessTag
+end;
+
+procedure TOpenGazeEvents.SetOnCalibrationPointResult(AValue: TOpenGazeEvent);
+begin
+  if FOnCalibrationPointResult = AValue then Exit;
+  FOnCalibrationPointResult := AValue;
+end;
+
+procedure TOpenGazeEvents.SetOnCalibrationPointStart(AValue: TOpenGazeEvent);
+begin
+  if FOnCalibrationPointStart = AValue then Exit;
+  FOnCalibrationPointStart := AValue;
 end;
 
 procedure TOpenGazeEvents.SetOnCalibrationResult(AValue: TOpenGazeEvent);

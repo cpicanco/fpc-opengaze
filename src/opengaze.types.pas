@@ -14,9 +14,16 @@ unit opengaze.types;
 interface
 
 uses
-  Classes, SysUtils, Generics.Collections;
+  Classes, SysUtils, Math, Generics.Collections;
 
 type
+  TCalibrationPoint = record
+    X : Float;
+    Y : Float;
+  end;
+
+  TCalibrationPoints = array of TCalibrationPoint;
+
   TOpenGazeServer = (OpenGazeControlServer, OpenGazeAnalysisServer);
 
   TPairsDictionary = specialize TDictionary<string, string>;

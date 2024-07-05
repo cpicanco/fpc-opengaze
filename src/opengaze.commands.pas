@@ -160,7 +160,11 @@ begin
       end;
     end;
 
-    Result := String.Join(TAB, [Result, S]);
+    if Result.IsEmpty then begin
+      Result := String.Join(TAB, [S]);
+    end else begin
+      Result := String.Join(TAB, [Result, S]);
+    end;
   end;
 end;
 

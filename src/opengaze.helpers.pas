@@ -16,13 +16,13 @@ unit opengaze.helpers;
 interface
 
 uses
-  Classes, SysUtils, math, opengaze.constants;
+  Classes, SysUtils, Math, opengaze.constants;
 
 type
 
-  { TFloaTOpenGazeHelper }
+  { TFloatOpenGazeHelper }
 
-  TFloaTOpenGazeHelper = type helper (TDoubleHelper) for Float
+  TFloatOpenGazeHelper = type helper (TDoubleHelper) for Float
     function ToValueArray : TStringArray;
     function ToXArray : TStringArray;
     function ToYArray : TStringArray;
@@ -42,25 +42,32 @@ type
     function ToValueArray  : TStringArray;
   end;
 
+  { TStringOpenGazeHelper }
+
+  TStringOpenGazeHelper = type helper (TStringHelper) for string
+    function ToFloat : Float;
+    function ToTimeInteger : Int64;
+  end;
+
 
 implementation
 
 var
   FormatSettings : TFormatSettings;
 
-{ TFloaTOpenGazeHelper }
+{ TFloatOpenGazeHelper }
 
-function TFloaTOpenGazeHelper.ToValueArray: TStringArray;
+function TFloatOpenGazeHelper.ToValueArray: TStringArray;
 begin
   Result := [VALUE, Self.ToString(FormatSettings)];
 end;
 
-function TFloaTOpenGazeHelper.ToXArray: TStringArray;
+function TFloatOpenGazeHelper.ToXArray: TStringArray;
 begin
   Result := [XCOORDENATE, Self.ToString(FormatSettings)];
 end;
 
-function TFloaTOpenGazeHelper.ToYArray: TStringArray;
+function TFloatOpenGazeHelper.ToYArray: TStringArray;
 begin
   Result := [YCOORDENATE, Self.ToString(FormatSettings)];
 end;
@@ -87,6 +94,18 @@ end;
 function TIntegerOpenGazeHelper.ToValueArray: TStringArray;
 begin
   Result := [VALUE, Self.ToString]
+end;
+
+{ TStringOpenGazeHelper }
+
+function TStringOpenGazeHelper.ToFloat: Float;
+begin
+  Result := StrToFloat(Self, FormatSettings);
+end;
+
+function TStringOpenGazeHelper.ToTimeInteger: Int64;
+begin
+  Result := Round(Self.ToFloat*1e+7);
 end;
 
 initialization
