@@ -22,6 +22,9 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    ButtonStopCalibrationRemote: TButton;
+    ButtonStartCalibrationRemote: TButton;
+    ButtonStopCalibration: TButton;
     ButtonConnect: TButton;
     ButtonDisconnect: TButton;
     ButtonStartRecording: TButton;
@@ -31,11 +34,14 @@ type
     procedure ButtonConnectClick(Sender: TObject);
     procedure ButtonDisconnectClick(Sender: TObject);
     procedure ButtonStartCalibrationClick(Sender: TObject);
+    procedure ButtonStartCalibrationRemoteClick(Sender: TObject);
     procedure ButtonStartRecordingClick(Sender: TObject);
+    procedure ButtonStopCalibrationClick(Sender: TObject);
+    procedure ButtonStopCalibrationRemoteClick(Sender: TObject);
     procedure ButtonStopRecordingClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
   private
-    procedure Update(Sender: TObject; Event : TPairsDictionary);
+    procedure UpdateList(Sender: TObject; Event : TPairsDictionary);
   public
 
   end;
@@ -67,9 +73,25 @@ begin
   OpenGazeControl.Calibration.Start;
 end;
 
+procedure TForm1.ButtonStartCalibrationRemoteClick(Sender: TObject);
+begin
+  OpenGazeControl.Calibration.UseCustomChoreography := True;
+  ButtonStartCalibrationClick(Self);
+end;
+
 procedure TForm1.ButtonStartRecordingClick(Sender: TObject);
 begin
   OpenGazeControl.Recording.Start;
+end;
+
+procedure TForm1.ButtonStopCalibrationClick(Sender: TObject);
+begin
+  OpenGazeControl.Calibration.Stop;
+end;
+
+procedure TForm1.ButtonStopCalibrationRemoteClick(Sender: TObject);
+begin
+  OpenGazeControl.Calibration.Stop;
 end;
 
 procedure TForm1.ButtonStopRecordingClick(Sender: TObject);
@@ -80,19 +102,21 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  OpenGazeControl.Events.OnStartCalibration := @Update;
-  OpenGazeControl.Events.OnEnableSendData := @Update;
-  OpenGazeControl.Events.OnDisableSendData := @Update;
-  OpenGazeControl.Events.OnCalibrationPointResult := @Update;
-  OpenGazeControl.Events.OnCalibrationPointStart := @Update;
+  OpenGazeControl.Events.OnStartCalibration := @UpdateList;
+  OpenGazeControl.Events.OnEnableSendData := @UpdateList;
+  OpenGazeControl.Events.OnDisableSendData := @UpdateList;
+  OpenGazeControl.Events.OnCalibrationPointResult := @UpdateList;
+  OpenGazeControl.Events.OnCalibrationPointStart := @UpdateList;
+  OpenGazeControl.Events.OnStartRecording := @UpdateList;
+  OpenGazeControl.Events.OnStopRecording := @UpdateList;
 end;
 
-procedure TForm1.Update(Sender: TObject; Event: TPairsDictionary);
+procedure TForm1.UpdateList(Sender: TObject; Event: TPairsDictionary);
 var
   Key: String;
 begin
   for Key in Event.Keys do begin
-    ListBox1.items.Add(Key + '=' + Event[Key]);
+    ListBox1.Items.Add(Key + '=' + Event[Key]);
   end;
 end;
 

@@ -35,6 +35,7 @@ type
       FOnDataReceived: TGazeDataEvent;
       FOnStartCalibration: TOpenGazeEvent;
       FOnStartRecording: TOpenGazeEvent;
+      FOnStopCalibration: TOpenGazeEvent;
       FOnStopRecording: TOpenGazeEvent;
       procedure SetIncomingThread(AValue: TIncomingThread);
       procedure SetOnCalibrationPointResult(AValue: TOpenGazeEvent);
@@ -46,6 +47,7 @@ type
       procedure SetOnDataReceived(AValue: TGazeDataEvent);
       procedure SetOnStartCalibration(AValue: TOpenGazeEvent);
       procedure SetOnStartRecording(AValue: TOpenGazeEvent);
+      procedure SetOnStopCalibration(AValue: TOpenGazeEvent);
       procedure SetOnStopRecording(AValue: TOpenGazeEvent);
     public
       constructor Create;
@@ -53,6 +55,7 @@ type
       destructor Destroy; override;
       property IncomingThread : TIncomingThread read FIncomingThread write SetIncomingThread;
       property OnStartCalibration : TOpenGazeEvent read FOnStartCalibration write SetOnStartCalibration;
+      property OnStopCalibration : TOpenGazeEvent read FOnStopCalibration write SetOnStopCalibration;
       property OnCalibrationResult : TOpenGazeEvent read FOnCalibrationResult write SetOnCalibrationResult;
       property OnCalibrationResultSummary : TOpenGazeEvent read FOnCalibrationResultSummary write SetOnCalibrationResultSummary;
       property OnStartRecording : TOpenGazeEvent read FOnStartRecording write SetOnStartRecording;
@@ -81,6 +84,18 @@ begin
       Dictionary := TagPairsToDict(RawTag.Pairs);
       try
         case RawTag.ID of
+          CALIBRATE_START : begin
+            if Dictionary[STATE] = _TRUE_ then begin
+              if Assigned(OnStartCalibration) then begin
+                OnStartCalibration(Self, Dictionary);
+              end;
+            end else begin
+              if Assigned(OnStopCalibration) then begin
+                OnStopCalibration(Self, Dictionary);
+              end;
+            end;
+          end;
+
           CALIBRATE_RESULT_SUMMARY : begin
             if Assigned(OnCalibrationResultSummary) then begin
               OnCalibrationResultSummary(Self, Dictionary);
@@ -218,6 +233,12 @@ procedure TOpenGazeEvents.SetOnStartRecording(AValue: TOpenGazeEvent);
 begin
   if FOnStartRecording = AValue then Exit;
   FOnStartRecording := AValue;
+end;
+
+procedure TOpenGazeEvents.SetOnStopCalibration(AValue: TOpenGazeEvent);
+begin
+  if FOnStopCalibration = AValue then Exit;
+  FOnStopCalibration := AValue;
 end;
 
 procedure TOpenGazeEvents.SetOnStopRecording(AValue: TOpenGazeEvent);

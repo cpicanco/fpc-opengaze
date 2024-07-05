@@ -24,7 +24,7 @@ object Form1: TForm1
     Left = 198
     Height = 25
     Top = 0
-    Width = 191
+    Width = 198
     Caption = 'Disconnect'
     TabOrder = 1
     OnClick = ButtonDisconnectClick
@@ -42,7 +42,7 @@ object Form1: TForm1
     Left = 198
     Height = 25
     Top = 25
-    Width = 191
+    Width = 198
     Caption = 'Stop Recording'
     TabOrder = 3
     OnClick = ButtonStopRecordingClick
@@ -64,5 +64,32 @@ object Form1: TForm1
     Align = alBottom
     ItemHeight = 0
     TabOrder = 5
+  end
+  object ButtonStopCalibration: TButton
+    Left = 198
+    Height = 25
+    Top = 50
+    Width = 198
+    Caption = 'Stop Calibration'
+    TabOrder = 6
+    OnClick = ButtonStopCalibrationClick
+  end
+  object ButtonStartCalibrationRemote: TButton
+    Left = 0
+    Height = 25
+    Top = 75
+    Width = 198
+    Caption = 'Start Calibration (Remote Server)'
+    TabOrder = 7
+    OnClick = ButtonStartCalibrationRemoteClick
+  end
+  object ButtonStopCalibrationRemote: TButton
+    Left = 198
+    Height = 25
+    Top = 75
+    Width = 198
+    Caption = 'Stop Calibration (Remote Server)'
+    TabOrder = 8
+    OnClick = ButtonStopCalibrationRemoteClick
   end
 end
