@@ -23,7 +23,8 @@ type
   private
     FOnReceive: TGazeDataEvent;
     FSocket: TOpenGazeSocket;
-    RXStrings : TThreadStringQueue;
+    FRXStrings : TThreadStringQueue;
+    FRXPartial : string;
     procedure Reply;
     procedure DebugString;
     procedure SetOnReceive(AValue: TGazeDataEvent);
@@ -44,14 +45,15 @@ uses synsock, OpenGaze.parser;
 constructor TIncomingThread.Create(Socket: TOpenGazeSocket);
 begin
   inherited Create(True);  // Create suspended
-  RXStrings := TThreadStringQueue.Create;
+  FRXPartial := '';
+  FRXStrings := TThreadStringQueue.Create;
   FSocket := Socket;
   FreeOnTerminate := True;
 end;
 
 destructor TIncomingThread.Destroy;
 begin
-  RXStrings.Free;
+  FRXStrings.Free;
   inherited Destroy;
 end;
 
@@ -61,8 +63,13 @@ var
   DelimiterIndex: SizeInt;
 begin
   RXString := '';
-  RXString := RXStrings.Dequeue;
+  RXString := FRXStrings.Dequeue;
   if RXString.IsEmpty then Exit;
+
+  if not FRXPartial.IsEmpty then begin
+    RXString := FRXPartial + RXString;
+    FRXPartial := '';
+  end;
 
   repeat
     DelimiterIndex := Pos(#13#10, RXString);
@@ -71,15 +78,21 @@ begin
       {$IFDEF DEBUG}
       Write(Command);
       {$ENDIF}
-      OnReceive(Self, ParseXML(Command));
+      if Command.StartsWith('<') then begin
+        OnReceive(Self, ParseXML(Command));
+      end else begin
+        OnReceive(Self, ParseXML(Command));
+      end;
       Delete(RXString, 1, DelimiterIndex + 1);
     end;
   until DelimiterIndex = 0;
+
+  FRXPartial := RXString;
 end;
 
 procedure TIncomingThread.DebugString;
 begin
-  Write(RXStrings.Dequeue);
+  Write(FRXStrings.Dequeue);
 end;
 
 procedure TIncomingThread.SetOnReceive(AValue: TGazeDataEvent);
@@ -115,7 +128,7 @@ begin
       end;
     end;
 
-    RXStrings.Enqueue(Commmand);
+    FRXStrings.Enqueue(Commmand);
     Queue(@Reply);
   end;
 end;
