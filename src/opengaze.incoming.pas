@@ -12,7 +12,8 @@ unit opengaze.incoming;
 interface
 
 uses
-  Classes, SysUtils, SyncObjs, opengaze.socket, opengaze.types;
+  Classes, SysUtils, SyncObjs,
+  opengaze.socket, opengaze.types, opengaze.queues;
 
 type
 
@@ -21,12 +22,10 @@ type
   TIncomingThread = class(TThread)
   private
     FOnReceive: TGazeDataEvent;
-    FRawTagReceived : TRawTag;
     FSocket: TOpenGazeSocket;
-    FSocketLock : TCriticalSection;
-    FLock : TCriticalSection;
+    RXStrings : TThreadStringQueue;
     procedure Reply;
-    procedure Debug;
+    procedure DebugString;
     procedure SetOnReceive(AValue: TGazeDataEvent);
   protected
     procedure Execute; override;
@@ -45,51 +44,42 @@ uses synsock, OpenGaze.parser;
 constructor TIncomingThread.Create(Socket: TOpenGazeSocket);
 begin
   inherited Create(True);  // Create suspended
+  RXStrings := TThreadStringQueue.Create;
   FSocket := Socket;
-  FSocketLock := TCriticalSection.Create;
-  FLock := TCriticalSection.Create;
   FreeOnTerminate := True;
 end;
 
 destructor TIncomingThread.Destroy;
 begin
-  FSocketLock.Free;
-  FLock.Free;
+  RXStrings.Free;
   inherited Destroy;
 end;
 
 procedure TIncomingThread.Reply;
 var
-  RawTag : TRawTag = (Tag: ERR; ID: NONE; Pairs: nil);
+  RXString , Command: string;
+  DelimiterIndex: SizeInt;
 begin
-  FLock.Acquire;
-  try
-    RawTag := FRawTagReceived;
-  finally
-    FLock.Release;
-  end;
+  RXString := '';
+  RXString := RXStrings.Dequeue;
+  if RXString.IsEmpty then Exit;
 
-  OnReceive(Self, RawTag);
+  repeat
+    DelimiterIndex := Pos(#13#10, RXString);
+    if DelimiterIndex > 0 then begin
+      Command := Copy(RXString, 1, DelimiterIndex+1);
+      {$IFDEF DEBUG}
+      Write(Command);
+      {$ENDIF}
+      OnReceive(Self, ParseXML(Command));
+      Delete(RXString, 1, DelimiterIndex + 1);
+    end;
+  until DelimiterIndex = 0;
 end;
 
-procedure TIncomingThread.Debug;
-var
-  LTag : string;
-  RawTag : TRawTag = (Tag: ERR; ID: NONE; Pairs: nil);
-  Pair: TTagPair;
+procedure TIncomingThread.DebugString;
 begin
-  FLock.Acquire;
-  try
-    RawTag := FRawTagReceived;
-  finally
-    FLock.Release;
-  end;
-
-  WriteStr(LTag, RawTag.Tag);
-  for Pair in RawTag.Pairs do begin
-    WriteLn(Format('%s, %s=%s', [LTag, Pair.Key, Pair.Value]));
-  end;
-  WriteLn('---------------------------------------------------');
+  Write(RXStrings.Dequeue);
 end;
 
 procedure TIncomingThread.SetOnReceive(AValue: TGazeDataEvent);
@@ -102,38 +92,30 @@ procedure TIncomingThread.Execute;
 var
   RawTagReceived : TRawTag = (Tag: ERR; ID: NONE; Pairs: nil);
   RawTagRequested : TRawTag = (Tag: ERR; ID: NONE; Pairs: nil);
+  Commmand: string;
 begin
   while not Terminated do begin
-    RawTagReceived := FSocket.Receive;
+    Commmand := '';
+    Commmand := FSocket.Receive;
+    if FSocket.IsBlocked then begin
+      RawTagReceived := ParseXML(Commmand);
+      RawTagRequested := FSocket.LastBlockedRawTag;
+      case RawTagReceived.Tag of
+        ACK: begin
+          if RawTagRequested.ID = RawTagReceived.ID then begin
+            FSocket.LastBlockedRawTag := RawTagReceived;
+            FSocket.Event.SetEvent;
+            Continue;
+          end;
+        end;
 
-    FLock.Acquire;
-    try
-      FRawTagReceived := RawTagReceived;
-    finally
-      FLock.Release;
-    end;
-
-    {$IFDEF DEBUG}
-    Queue(@Debug);
-    {$ENDIF}
-
-    // reply blocking commands (Socket.Request)
-    RawTagRequested := FSocket.LastBlockingRawTag;
-    case RawTagReceived.Tag of
-      ACK: begin
-        if RawTagRequested.ID = RawTagReceived.ID then begin
-          FSocket.LastBlockingRawTag := RawTagReceived;
-          FSocket.Event.SetEvent;
-          Continue;
+        otherwise begin
+          { do nothing }
         end;
       end;
-
-      otherwise begin
-        { do nothing }
-      end;
     end;
 
-    // receive non-blocking commands (Socket.Send)
+    RXStrings.Enqueue(Commmand);
     Queue(@Reply);
   end;
 end;
