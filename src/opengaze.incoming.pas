@@ -78,11 +78,7 @@ begin
       {$IFDEF DEBUG}
       Write(Command);
       {$ENDIF}
-      if Command.StartsWith('<') then begin
-        OnReceive(Self, ParseXML(Command));
-      end else begin
-        OnReceive(Self, ParseXML(Command));
-      end;
+      OnReceive(Self, ParseXML(Command));
       Delete(RXString, 1, DelimiterIndex + 1);
     end;
   until DelimiterIndex = 0;

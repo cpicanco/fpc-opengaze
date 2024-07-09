@@ -14,17 +14,24 @@ unit opengaze.calibration.choreography;
 interface
 
 uses
-  Classes, SysUtils, choreographies;
+  Classes, SysUtils, opengaze.types, choreographies;
 
 type
 
   { TOpenGazeCalibrationChoreography }
 
   TOpenGazeCalibrationChoreography = class(TCalibrationChoreography)
+  private
+    FOnPointStart : TOpenGazeEvent;
+    FOnPointEnd   : TOpenGazeEvent;
+    procedure SetOnPointEnd(AValue: TOpenGazeEvent);
+    procedure SetOnPointStart(AValue: TOpenGazeEvent);
   public
     constructor Create;
     destructor Destroy; override;
-    procedure NextMonitor;
+    procedure SelectNextScreen;
+    property OnPointStart : TOpenGazeEvent read FOnPointStart write SetOnPointStart;
+    property OnPointEnd : TOpenGazeEvent read FOnPointEnd write SetOnPointEnd;
   end;
 
 
@@ -36,6 +43,20 @@ implementation
 uses Forms, Controls, forms.background;
 
 { TOpenGazeCalibrationChoreography }
+
+procedure TOpenGazeCalibrationChoreography.SetOnPointEnd(
+  AValue: TOpenGazeEvent);
+begin
+  if FOnPointEnd = AValue then Exit;
+  FOnPointEnd := AValue;
+end;
+
+procedure TOpenGazeCalibrationChoreography.SetOnPointStart(
+  AValue: TOpenGazeEvent);
+begin
+  if FOnPointStart = AValue then Exit;
+  FOnPointStart := AValue;
+end;
 
 constructor TOpenGazeCalibrationChoreography.Create;
 begin
@@ -54,11 +75,9 @@ begin
   inherited Destroy;
 end;
 
-procedure TOpenGazeCalibrationChoreography.NextMonitor;
+procedure TOpenGazeCalibrationChoreography.SelectNextScreen;
 begin
   FormBackground.MoveToNextMonitor;
-  FormBackground.Width := Screen.Width;
-  FormBackground.Height := Screen.Height;
 end;
 
 end.

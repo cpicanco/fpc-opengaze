@@ -137,6 +137,7 @@ end;
 
 procedure TCalibrationChoreography.Stop;
 begin
+  FAnimation.Reset;
   FAnimation.ClearBackground;
 end;
 

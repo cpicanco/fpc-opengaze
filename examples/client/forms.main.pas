@@ -14,7 +14,7 @@ unit forms.main;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Menus,
   opengaze.types;
 
 type
@@ -22,6 +22,7 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    ButtonNextScreen: TButton;
     ButtonStopCalibrationRemote: TButton;
     ButtonStartCalibrationRemote: TButton;
     ButtonStopCalibration: TButton;
@@ -31,8 +32,11 @@ type
     ButtonStopRecording: TButton;
     ButtonStartCalibration: TButton;
     ListBox1: TListBox;
+    MenuItemSaveToFile: TMenuItem;
+    PopupMenu1: TPopupMenu;
     procedure ButtonConnectClick(Sender: TObject);
     procedure ButtonDisconnectClick(Sender: TObject);
+    procedure ButtonNextScreenClick(Sender: TObject);
     procedure ButtonStartCalibrationClick(Sender: TObject);
     procedure ButtonStartCalibrationRemoteClick(Sender: TObject);
     procedure ButtonStartRecordingClick(Sender: TObject);
@@ -40,8 +44,10 @@ type
     procedure ButtonStopCalibrationRemoteClick(Sender: TObject);
     procedure ButtonStopRecordingClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure MenuItemSaveToFileClick(Sender: TObject);
   private
     procedure UpdateList(Sender: TObject; Event : TPairsDictionary);
+    procedure EndCalibration(Sender: TObject; Event : TPairsDictionary);
   public
 
   end;
@@ -57,6 +63,9 @@ uses opengaze, opengaze.logger;
 
 { TForm1 }
 
+var
+  Source : string;
+
 procedure TForm1.ButtonConnectClick(Sender: TObject);
 begin
   OpenGazeControl.Connect;
@@ -67,16 +76,25 @@ begin
   OpenGazeControl.Disconnect;
 end;
 
+procedure TForm1.ButtonNextScreenClick(Sender: TObject);
+begin
+  OpenGazeControl.Calibration.Choreography.SelectNextScreen;
+end;
+
 procedure TForm1.ButtonStartCalibrationClick(Sender: TObject);
 begin
+  Source := 'Gazepoint';
+  OpenGazeControl.Calibration.UseCustomChoreography := False;
   OpenGazeControl.Calibration.Show;
   OpenGazeControl.Calibration.Start;
 end;
 
 procedure TForm1.ButtonStartCalibrationRemoteClick(Sender: TObject);
 begin
+  Source := 'Custom';
   OpenGazeControl.Calibration.UseCustomChoreography := True;
-  ButtonStartCalibrationClick(Self);
+  OpenGazeControl.Calibration.Show;
+  OpenGazeControl.Calibration.Start;
 end;
 
 procedure TForm1.ButtonStartRecordingClick(Sender: TObject);
@@ -102,13 +120,19 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  OpenGazeControl.Events.OnStartCalibration := @UpdateList;
-  OpenGazeControl.Events.OnEnableSendData := @UpdateList;
-  OpenGazeControl.Events.OnDisableSendData := @UpdateList;
-  OpenGazeControl.Events.OnCalibrationPointResult := @UpdateList;
-  OpenGazeControl.Events.OnCalibrationPointStart := @UpdateList;
-  OpenGazeControl.Events.OnStartRecording := @UpdateList;
-  OpenGazeControl.Events.OnStopRecording := @UpdateList;
+  //OpenGazeControl.Events.OnStartCalibration := @UpdateList;
+  //OpenGazeControl.Events.OnEnableSendData := @UpdateList;
+  //OpenGazeControl.Events.OnDisableSendData := @UpdateList;
+  //OpenGazeControl.Events.OnCalibrationPointResult := @UpdateList;
+  //OpenGazeControl.Events.OnCalibrationPointStart := @UpdateList;
+  //OpenGazeControl.Events.OnStartRecording := @UpdateList;
+  //OpenGazeControl.Events.OnStopRecording := @UpdateList;
+  OpenGazeControl.Events.OnCalibrationResult := @EndCalibration;
+end;
+
+procedure TForm1.MenuItemSaveToFileClick(Sender: TObject);
+begin
+  ListBox1.Items.SaveToFile('ListBox1.txt');
 end;
 
 procedure TForm1.UpdateList(Sender: TObject; Event: TPairsDictionary);
@@ -118,6 +142,16 @@ begin
   for Key in Event.Keys do begin
     ListBox1.Items.Add(Key + '=' + Event[Key]);
   end;
+end;
+
+procedure TForm1.EndCalibration(Sender: TObject; Event: TPairsDictionary);
+begin
+  //UpdateList(Sender, Event);
+  OpenGazeControl.Calibration.Stop;
+  OpenGazeControl.Calibration.Hide;
+  ListBox1.Items.Add(Source + #9 + OpenGazeControl.Calibration.ResultSummary);
+
+  Source := '';
 end;
 
 end.

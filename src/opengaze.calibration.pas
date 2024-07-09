@@ -57,7 +57,6 @@ type
       property Points : TOpenGazeCalibrationPoints read FPoints;
       property Choreography : TOpenGazeCalibrationChoreography read FChoreography write SetChoreography;
       property UseCustomChoreography : Boolean read GetRemote write SetRemote;
-
   end;
 
 implementation
@@ -124,18 +123,35 @@ procedure TOpenGazeCalibration.SetRemote(AValue: Boolean);
 begin
   if FChoreography.Animation.WaitForRemote = AValue then Exit;
   FChoreography.Animation.WaitForRemote := AValue;
+
+  if FChoreography.Animation.WaitForRemote then begin
+    FChoreography.OnPointStart := FEvents.OnCalibrationPointStart;
+    FEvents.OnCalibrationPointStart := @StartPointAnimation;
+
+    FChoreography.OnPointEnd := FEvents.OnCalibrationPointResult;
+    FEvents.OnCalibrationPointResult := @EndPointTimeout;
+  end else begin
+    FEvents.OnCalibrationPointStart := FChoreography.OnPointStart;
+    FEvents.OnCalibrationPointResult := FChoreography.OnPointEnd;
+  end;
 end;
 
 procedure TOpenGazeCalibration.StartPointAnimation(Sender: TObject;
   Event: TPairsDictionary);
 begin
   FChoreography.Animation.StartPointAnimation;
+  if Assigned(FChoreography.OnPointStart) then begin
+    FChoreography.OnPointStart(Sender, Event);
+  end;
 end;
 
 procedure TOpenGazeCalibration.EndPointTimeout(Sender: TObject;
   Event: TPairsDictionary);
 begin
   FChoreography.Animation.EndPointTimeout;
+  if Assigned(FChoreography.OnPointEnd) then begin
+    FChoreography.OnPointEnd(Sender, Event);
+  end;
 end;
 
 constructor TOpenGazeCalibration.Create(ASocket: TOpenGazeSocket;
@@ -161,10 +177,10 @@ var
   Point : TNormalizedPoint;
 begin
   if UseCustomChoreography then begin
-    Points.Delay := 1.2;
+    Points.Delay := 1.0;
     Points.Clear;
 
-    FChoreography.Animation.Delay := PointDelay.ToTimeInteger-2500000;
+    FChoreography.Animation.Delay := PointDelay.ToTimeInteger-3000000;
     FChoreography.Animation.Duration := PointDuration.ToTimeInteger;
 
     NormalizedPoints := FChoreography.GetPoints;
@@ -189,13 +205,6 @@ end;
 
 procedure TOpenGazeCalibration.Start(Blocking: Boolean);
 begin
-  if UseCustomChoreography then begin
-    FEvents.OnCalibrationPointStart := @StartPointAnimation;
-    FEvents.OnCalibrationPointResult := @EndPointTimeout;
-  end else begin
-    FEvents.OnCalibrationPointStart := nil;
-    FEvents.OnCalibrationPointResult := nil;
-  end;
   SendCommand(Calibration.Start, Blocking);
 end;
 

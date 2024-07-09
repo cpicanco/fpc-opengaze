@@ -63,6 +63,7 @@ type
       destructor Destroy; override;
       procedure ClearBackground;
       procedure PaintBackPoint(X, Y : Integer);
+      procedure Reset;
       procedure SetSize(Width, Height : Integer);
       procedure StartPointDuration;
       procedure StartPointAnimation;
@@ -273,6 +274,11 @@ begin
   Canvas.Pen.Color := clWhite;
   Canvas.Brush.Color := clRed;
   Canvas.EllipseC(X, Y, 2, 2);
+end;
+
+procedure TAnimation.Reset;
+begin
+  FIndex := 0;
 end;
 
 procedure TAnimation.SetSize(Width, Height: Integer);
