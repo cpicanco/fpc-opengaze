@@ -74,23 +74,51 @@ constructor TOpenGazeRecording.Create(ASocket: TOpenGazeSocket; AEvents : TOpenG
 begin
   inherited Create(ASocket, AEvents);
   with Recording do begin
-    FDisabledCommands := TStringArray.Create(
-      DisableSendTime,
-      DisableSendPupilLeft,
-      DisableSendPupilRight,
-      DisableSend3DEyeLeft,
-      DisableSend3DEyeRight,
-      DisableSendCursor,
-      DisableSendBlink,
-      DisableSendUserData);
+    //FDisabledCommands := TStringArray.Create(
+    //  DisableSendTime,
+    //  DisableSendPupilLeft,
+    //  DisableSendPupilRight,
+    //  DisableSend3DEyeLeft,
+    //  DisableSend3DEyeRight,
+    //  DisableSendCursor,
+    //  DisableSendBlink,
+    //  DisableSendUserData);
+
+    SetLength(FDisabledCommands, 0);
+
+    //FEnabledCommands := TStringArray.Create(
+    //  EnableSendCounter,
+    //  EnableSendTimeTick,
+    //  EnableSendPointOfGazeFixation,
+    //  EnableSendPointOfGazeLeft,
+    //  EnableSendPointOfGazeRight,
+    //  EnableSendPointOfGazeBest);
 
     FEnabledCommands := TStringArray.Create(
       EnableSendCounter,
+      EnableSendTime,
       EnableSendTimeTick,
       EnableSendPointOfGazeFixation,
       EnableSendPointOfGazeLeft,
       EnableSendPointOfGazeRight,
-      EnableSendPointOfGazeBest);
+      EnableSendPointOfGazeBest,
+      EnableSendAssistiveCommunicationPointOfGaze,
+      EnableSendPupilLeft,
+      EnableSendPupilRight,
+      EnableSend3DEyeLeft,
+      EnableSend3DEyeRight,
+      EnableSendCursor,
+      EnableSendKeyboardInput,
+      EnableSendBlink,
+      EnableSendDial,
+      EnableSendGalvanicSkinResponse,
+      EnableSendHeartRate,
+      EnableSendHeartRatePulse,
+      EnableSendHeartBeatInterbeatInterval,
+      EnableSendTransistorTransistorLogicInputOutput,
+      EnableSendPupilInMillimeters,
+      EnableSendUserData
+      );
   end;
 end;
 
@@ -119,8 +147,6 @@ procedure TOpenGazeRecording.Send(DoEnable, Blocking: Boolean);
 var
   Command : string;
 begin
-  ParseSendCommands;
-
   if DoEnable then begin
     Command := GetStartCommand;
   end else begin
@@ -141,6 +167,7 @@ end;
 
 procedure TOpenGazeRecording.Start(Blocking: Boolean);
 begin
+  ParseSendCommands;
   DataHeader := GetDataHeader;
   BeginUpdateData;
   Send(True, Blocking);

@@ -28,7 +28,7 @@ const
   SERVER_NACK = 'NAC'; // Server tag, it indicates a failed SET/GET command.
   SERVER_CAL  = 'CAL'; // Server tag, responses are generated based on calibration routines
   SERVER_REC  = 'REC'; // Server tag, holds the data transmitted
-
+  //SERVER_UPDATE = 'UPDATE'; // not implemented yet here
 
   ID = 'ID'; // Parameter type: string
   NONE = '';
@@ -52,17 +52,30 @@ const
   PTS = 'PTS'; // Parameter type: Numeric
   XCOORDENATE = 'X';
   YCOORDENATE = 'Y';
+  SCREEN_WIDTH = 'WIDTH';
+  SCREEN_HEIGHT = 'HEIGHT';
   AVE_ERROR = 'AVE_ERROR';  // Parameter type: Numeric
   PT = 'PT';
+
   USER_DATA = 'USER_DATA'; // Value of ID parameter
   TRACKER_DISPLAY = 'TRACKER_DISPLAY'; // Value of ID parameter
   TIME_TICK_FREQUENCY = 'TIME_TICK_FREQUENCY'; // Value of ID parameter
   SCREEN_SIZE = 'SCREEN_SIZE'; // Value of ID parameter
   CAMERA_SIZE = 'CAMERA_SIZE'; // Value of ID parameter
   PRODUCT_ID = 'PRODUCT_ID'; // Value of ID parameter
+  BUS = 'BUS';
+  RATE = 'RATE';
   SERIAL_ID = 'SERIAL_ID'; // Value of ID parameter
   COMPANY_ID = 'COMPANY_ID'; // Value of ID parameter
   API_ID = 'API_ID'; // Value of ID parameter
+  TRACKER_ID = 'TRACKER_ID'; // Value of ID parameter
+  ACTIVE_ID = 'ACTIVE_ID';
+  MAX_ID = 'MAX_ID';
+  SEARCH = 'SEARCH';
+  MARKER_PIX = 'MARKER_PIX'; // Value of ID parameter
+  AAC_FILTER = 'AAC_FILTER';
+  TTL_WRITE = 'TTL_WRITE';
+  CHANNEL = 'CHANNEL';
 
   ENABLE_SEND_DATA = 'ENABLE_SEND_DATA'; // Value of ID parameter
   ENABLE_SEND_COUNTER = 'ENABLE_SEND_COUNTER'; // Value of ID parameter
@@ -72,12 +85,22 @@ const
   ENABLE_SEND_POG_LEFT = 'ENABLE_SEND_POG_LEFT'; // Value of ID parameter
   ENABLE_SEND_POG_RIGHT = 'ENABLE_SEND_POG_RIGHT'; // Value of ID parameter
   ENABLE_SEND_POG_BEST = 'ENABLE_SEND_POG_BEST'; // Value of ID parameter
+  ENABLE_SEND_POG_AAC = 'ENABLE_SEND_POG_AAC'; // Value of ID parameter
   ENABLE_SEND_PUPIL_LEFT = 'ENABLE_SEND_PUPIL_LEFT'; // Value of ID parameter
   ENABLE_SEND_PUPIL_RIGHT = 'ENABLE_SEND_PUPIL_RIGHT'; // Value of ID parameter
   ENABLE_SEND_EYE_LEFT = 'ENABLE_SEND_EYE_LEFT'; // Value of ID parameter
   ENABLE_SEND_EYE_RIGHT = 'ENABLE_SEND_EYE_RIGHT'; // Value of ID parameter
   ENABLE_SEND_CURSOR = 'ENABLE_SEND_CURSOR'; // Value of ID parameter
+  ENABLE_SEND_KB = 'ENABLE_SEND_KB'; // Value of ID parameter
   ENABLE_SEND_BLINK = 'ENABLE_SEND_BLINK'; // Value of ID parameter
+  ENABLE_SEND_PUPILMM = 'ENABLE_SEND_PUPILMM'; // Value of ID parameter
+  ENABLE_SEND_DIAL = 'ENABLE_SEND_DIAL'; // Value of ID parameter
+  ENABLE_SEND_GSR = 'ENABLE_SEND_GSR'; // Value of ID parameter
+  ENABLE_SEND_HR = 'ENABLE_SEND_HR'; // Value of ID parameter
+  ENABLE_SEND_HR_PULSE = 'ENABLE_SEND_HR_PULSE'; // Value of ID parameter
+  ENABLE_SEND_HR_IBI = 'ENABLE_SEND_HR_IBI'; // Value of ID parameter
+  ENABLE_SEND_TTL = 'ENABLE_SEND_TTL'; // Value of ID parameter
+  ENABLE_SEND_PIX = 'ENABLE_SEND_PIX'; // Value of ID parameter
   ENABLE_SEND_USER_DATA = 'ENABLE_SEND_USER_DATA'; // Value of ID parameter
 
   // OpenGaze Analysis
@@ -122,7 +145,13 @@ const
   BPOGY = 'BPOGY'; // Parameter type: Numeric. The Y-coordinate of the best eye POG, as a fraction of the screen size.
   BPOGV = 'BPOGV'; // Parameter type: Boolean. The valid flag with value of 1 if the data is valid, and 0 if it is not.
 
-  // 5.8 Left Eye Pupil
+  // 5.8 Assistive Communication POG
+
+  APOGX = 'APOGX';
+  APOGY = 'APOGY';
+  APOGV = 'APOGV';
+
+  // 5.9 Left Eye Pupil
 
   LPCX = 'LPCX'; // Parameter type: Numeric. The X-coordinate of the left eye pupil in the camera image, as a fraction of the camera image size.
   LPCY = 'LPCY'; // Parameter type: Numeric. The Y-coordinate of the left eye pupil in the camera image, as a fraction of the camera image size.
@@ -130,7 +159,7 @@ const
   LPS = 'LPS'; // Parameter type: Numeric. The scale factor of the left eye pupil (unitless). Value equals 1 at calibration depth, is less than 1 when user is closer to the eye tracker and greater than 1 when user is further away.
   LPV = 'LPV'; // Parameter type: Boolean. The valid flag with value of 1 if the data is valid, and 0 if it is not.
 
-  // 5.9 Right Eye Pupil
+  // 5.10 Right Eye Pupil
 
   RPCX = 'RPCX'; // Parameter type: Numeric. The X-coordinate of the right eye pupil in the camera image, as a fraction of the camera image size.
   RPCY = 'RPCY'; // Parameter type: Numeric. The Y-coordinate of the right eye pupil in the camera image, as a fraction of the camera image size.
@@ -138,7 +167,7 @@ const
   RPS = 'RPS'; // Parameter type: Numeric. The scale factor of the right eye pupil (unitless). Value equals 1 at calibration depth, is less than 1 when user is closer to the eye tracker and greater than 1 when user is further away.
   RPV = 'RPV'; // Parameter type: Boolean. The valid flag with value of 1 if the data is valid, and 0 if it is not.
 
-  // 5.10 Left Eye 3D Data
+  // 5.11 Left Eye 3D Data
 
   LEYEX = 'LEYEX'; // Parameter type: Numeric. The X-coordinate of the left eye with 3D space with respect to the camera focal point, in units of meters.
   LEYEY = 'LEYEY'; // Parameter type: Numeric. The Y-coordinate of the left eye with 3D space with respect to the camera focal point, in units of meters.
@@ -146,7 +175,7 @@ const
   LPUPILD = 'LPUPILD'; // Parameter type: Numeric. The diameter of the left eye pupil in units of meters.
   LPUPILV = 'LPUPILV'; // Parameter type: Boolean. The valid flag with value of 1 if the data is valid, and 0 if it is not.
 
-  // 5.11 Right Eye 3D Data
+  // 5.12 Right Eye 3D Data
 
   REYEX = 'REYEX'; // Parameter type: Numeric. The X-coordinate of the right eye with 3D space with respect to the camera focal point, in units of meters.
   REYEY = 'REYEY'; // Parameter type: Numeric. The Ycoordinate of the right eye with 3D space with respect to the camera focal point, in units of meters.
@@ -154,19 +183,71 @@ const
   RPUPILD = 'RPUPILD'; // Parameter type: Numeric. The diameter of the right eye pupil in units of meters.
   RPUPILV = 'RPUPILV'; // Parameter type: Boolean. The valid flag with value of 1 if the data is valid, and 0 if it is not.
 
-  // 5.12 Cursor position
+  // 5.13 Cursor position
 
   CS = 'CS'; // Parameter type: Numeric. 0 for idle, 1 for left mouse button down, 2 for right button down, 3 for left button up, 4 for right button up.
   CX = 'CX'; // Parameter type: Numeric. The X-coordinate of the mouse cursor, as percentage of the screen size.
   CY = 'CY'; // Parameter type: Numeric. The Y-coordinate of the mouse cursor, as percentage of the screen size.
 
-  // 5.13 User data
+  // 5.14 Keyboard Input
+
+  KB = 'KB';
+  KBS = 'KBS';
+
+  // 5.15 Blink Data
+
+  BKID = 'BKID'; // Parameter type: Numeric. Each blink is assigned an ID value and incremented by one. The BKID value equals 0 for every record where no blink has been detected.
+  BKDUR = 'BKDUR'; // Parameter type: Numeric. The duration of the preceding blink in seconds.
+  BKPMIN = 'BKPMIN'; // Parameter type: Numeric. The number of blinks in the previous 60 second period of time.
+
+  // 5.16 Pupil Diameter (millimeters)
+
+  LPMM = 'LPMM';
+  LPMMV = 'LPMMV';
+  RPMM = 'RPMM';
+  RPMMV = 'RPMMV';
+
+  // 5.17 Dial
+
+  DIAL = 'DIAL';
+  DIALV = 'DIALV';
+
+  // 5.18 Galvanic Skin Response (GSR)
+
+  GSR = 'GSR';
+  GSRV = 'GSRV';
+
+  // 5.19 Heart Rate
+
+  HR = 'HR';
+  HRV = 'HRV';
+
+  // 5.20 Heart Rate Pulse
+
+  HRP = 'HRP';
+
+  // 5.21 Heart Rate Interbeat Interval
+
+  HRIBI = 'HRIBI';
+
+  // 5.22 TTL Input/Output
+
+  TTL0 = 'TTL0';
+  TTL1 = 'TTL1';
+  TTLV = 'TTLV';
+
+  // 5.23 Pixel Conversion Factor
+
+  PIXX = 'PIXX';
+  PIXY = 'PIXY';
+  PIXS = 'PIXS';
+  PIXV = 'PIXV';
+
+  // 5.24 User data
+
   USER = 'USER'; // Parameter type: string. Synchronization markers.
 
-  // 5.14 Blink Data
-  BKID = 'BKID'; // Parameter type: Numeric. Each blink is assigned an ID value and incremented by one. The BKID value equals 0 for every record where no blink has been detected.
-  BKDUR = 'BKPMIN'; // Parameter type: Numeric. The duration of the preceding blink in seconds.
-  BKPMIN = 'BKPMIN'; // Parameter type: Numeric. The number of blinks in the previous 60 second period of time.
+
 
 const
   HEADER_CNT :
@@ -187,8 +268,11 @@ const
   HEADER_RIGHT_POINT_OF_GAZE :
     array [0..2] of string = (RPOGX, RPOGY, RPOGV);
 
-  HEADER_BEST_POINT_OF_GAZER :
+  HEADER_BEST_POINT_OF_GAZE :
     array [0..2] of string = (BPOGX, BPOGY, BPOGV);
+
+  HEADER_AAC_POINT_OF_GAZE :
+    array [0..2] of string = (APOGX, APOGY, APOGV);
 
   HEADER_LEFT_PUPIL :
     array [0..4] of string = (LPCX,  LPCY,  LPD,  LPS, LPV);
@@ -203,13 +287,41 @@ const
     array [0..4] of string = (REYEX, REYEY, REYEZ, RPUPILD, RPUPILV);
 
   HEADER_CURSOR_POSITION :
-    array [0..2] of string = (CS, CX, CY);
+    array [0..2] of string = (CX, CY, CS);
+
+  HEADER_KB :
+    array [0..1] of string = (KB, KBS);
+
+  HEADER_BLINK_DATA :
+    array [0..2] of string = (BKID, BKDUR, BKPMIN);
+
+  HEADER_PUPILMM :
+    array [0..3] of string = (LPMM, LPMMV, RPMM, RPMMV);
+
+  HEADER_DIAL :
+    array [0..1] of string = (DIAL, DIALV);
+
+  HEADER_GSR :
+    array [0..1] of string = (GSR, GSRV);
+
+  HEADER_HR :
+    array [0..1] of string = (HR, HRV);
+
+  HEADER_HR_PULSE :
+    array [0..0] of string = (HRP);
+
+  HEADER_HR_IBI :
+    array [0..0] of string = (HRIBI);
+
+  HEADER_TTL :
+    array [0..2] of string = (TTL0, TTL1, TTLV);
+
+  HEADER_PIX :
+    array [0..3] of string = (PIXX, PIXY, PIXS, PIXV);
 
   HEADER_USER_DATA :
     array [0..0] of string = (USER);
 
-  HEADER_BLINK_DATA :
-    array [0..2] of string = (BKID, BKDUR, BKPMIN);
 
 const
   VALUE_KILL : array [0..1] of string = (VALUE, KILL);
@@ -247,6 +359,18 @@ var
       CALIB_ADD_PT,
       CALIB_RESULT,
       USER_DATA,
+      TRACKER_DISPLAY,
+      TIME_TICK_FREQUENCY,
+      SCREEN_SIZE,
+      CAMERA_SIZE,
+      PRODUCT_ID,
+      SERIAL_ID,
+      COMPANY_ID,
+      API_ID,
+      TRACKER_ID,
+      MARKER_PIX,
+      AAC_FILTER,
+      TTL_WRITE,
       RECORD_START,
       ENABLE_SEND_DATA,
       ENABLE_SEND_COUNTER,
@@ -256,12 +380,22 @@ var
       ENABLE_SEND_POG_LEFT,
       ENABLE_SEND_POG_RIGHT,
       ENABLE_SEND_POG_BEST,
+      ENABLE_SEND_POG_AAC,
       ENABLE_SEND_PUPIL_LEFT,
       ENABLE_SEND_PUPIL_RIGHT,
       ENABLE_SEND_EYE_LEFT,
       ENABLE_SEND_EYE_RIGHT,
       ENABLE_SEND_CURSOR,
+      ENABLE_SEND_KB,
       ENABLE_SEND_BLINK,
+      ENABLE_SEND_PUPILMM,
+      ENABLE_SEND_DIAL,
+      ENABLE_SEND_GSR,
+      ENABLE_SEND_HR,
+      ENABLE_SEND_HR_PULSE,
+      ENABLE_SEND_HR_IBI,
+      ENABLE_SEND_TTL,
+      ENABLE_SEND_PIX,
       ENABLE_SEND_USER_DATA);
 
 initialization

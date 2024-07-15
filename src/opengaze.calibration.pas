@@ -48,6 +48,7 @@ type
       procedure Hide(Blocking : Boolean = True);
       procedure Start(Blocking : Boolean = True);
       procedure Stop(Blocking : Boolean = True);
+      procedure SelectNextScreen;
       function ResultSummary : string;
       function PointDelay : string;
       function PointDuration : string;
@@ -163,6 +164,7 @@ begin
   FPoints := TOpenGazeCalibrationPoints.Create(ASocket, AEvents);
 
   FChoreography := OpenGazeCalibrationChoreography;
+  FChoreography.Events := FEvents;
 end;
 
 destructor TOpenGazeCalibration.Destroy;
@@ -177,7 +179,9 @@ var
   Point : TNormalizedPoint;
 begin
   if UseCustomChoreography then begin
+    if FChoreography.Visible then Exit;
     Points.Delay := 1.0;
+    Points.Timeout := 1.5;
     Points.Clear;
 
     FChoreography.Animation.Delay := PointDelay.ToTimeInteger-3000000;
@@ -213,6 +217,15 @@ begin
   SendCommand(Calibration.Stop, Blocking);
   if UseCustomChoreography then begin
     FChoreography.Stop;
+  end;
+end;
+
+procedure TOpenGazeCalibration.SelectNextScreen;
+begin
+  Choreography.SelectNextScreen;
+
+  with Choreography.BoundsRect do begin
+    SendCommand(Calibration.SetScreenSize(Left, Top, Width, Height));
   end;
 end;
 

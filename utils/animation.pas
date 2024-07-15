@@ -32,6 +32,7 @@ type
       FAnimating : Boolean;
       FBitmapBack : TBGRABitmap;
       FBitmap : TBGRABitmap;
+      FGaze: TPoint;
       FInvalidate: TProcedureOfObject;
       FMustWaitForRemote : Boolean;
       FDelay: TLargeInteger;
@@ -54,7 +55,6 @@ type
       procedure AnimateDistance(Sender: TObject);
       procedure AnimatePoint(Sender : TObject);
       procedure SetupNextPoint;
-      procedure Paint;
       function AssignRect(ARect : TRect) : TRect; overload;
       function AssignRect(X, Y : Integer) : TRect; overload;
       function CalculateCentralMarker(ARect : TRect; ASize : integer) : TRect;
@@ -62,6 +62,7 @@ type
       constructor Create;
       destructor Destroy; override;
       procedure ClearBackground;
+      procedure ClearForeground;
       procedure PaintBackPoint(X, Y : Integer);
       procedure Reset;
       procedure SetSize(Width, Height : Integer);
@@ -69,6 +70,7 @@ type
       procedure StartPointAnimation;
       procedure EndPointTimeout;
       procedure ClearPoints;
+      procedure Paint;
       procedure Add(X, Y : integer);
       function GetCentralMarker : TRect;
       property Delay : TLargeInteger read FDelay write FDelay;
@@ -86,6 +88,7 @@ type
       property ReducePointSize : Boolean read FReducePointSize write FReducePointSize;
       property Invalidate : TProcedureOfObject read FInvalidate write FInvalidate;
       property WaitForRemote : Boolean read FMustWaitForRemote write FMustWaitForRemote;
+      property Gaze : TPoint read FGaze write FGaze;
   end;
 
 implementation
@@ -157,40 +160,44 @@ end;
 procedure TAnimation.Paint;
 var
   Canvas : TBGRACanvas;
+
+  procedure DrawGaze;
+  begin
+    Canvas.Pen.Color := clGreen;
+    Canvas.Brush.Color := clNone;
+    Canvas.EllipseC(Gaze.X, Gaze.Y, InSize, InSize);
+  end;
+
+  procedure DrawCalibrationPoint(Color : TColor);
+  begin
+    Canvas.Pen.Color := clWhite;
+    Canvas.Brush.Color := clWhite;
+    Canvas.Ellipse(Target);
+
+    Canvas.Pen.Color := Color;
+    Canvas.Brush.Color := Color;
+    Canvas.Ellipse(CentralMarker);
+
+    //Canvas.TextRect(Target,
+    //  Target.CenterPoint.X - (Canvas.TextWidth(LText) div 2),
+    //  Target.CenterPoint.Y - (Canvas.TextHeight(LText) div 2),
+    //  LText);
+  end;
+
 begin
   Canvas := FBitmap.CanvasBGRA;
   Canvas.Draw(0, 0, FBitmapBack);
   case FState of
     Waiting : begin
-
+      DrawGaze;
     end;
 
     PaintingPointDelay : begin
-      Canvas.Pen.Color := clWhite;
-      Canvas.Brush.Color := clWhite;
-      Canvas.Ellipse(Target);
-
-      Canvas.Pen.Color := clBlack;
-      Canvas.Brush.Color := clBlack;
-      Canvas.Ellipse(CentralMarker);
-      //Canvas.TextRect(Target,
-      //  Target.CenterPoint.X - (Canvas.TextWidth(LText) div 2),
-      //  Target.CenterPoint.Y - (Canvas.TextHeight(LText) div 2),
-      //  LText);
+      DrawCalibrationPoint(clBlack);
     end;
 
     PaintingPointDuration : begin
-      Canvas.Pen.Color := clWhite;
-      Canvas.Brush.Color := clWhite;
-      Canvas.Ellipse(Target);
-
-      Canvas.Pen.Color := clRed;
-      Canvas.Brush.Color := clRed;
-      Canvas.Ellipse(CentralMarker);
-      //Canvas.TextRect(Target,
-      //  Target.CenterPoint.X - (Canvas.TextWidth(LText) div 2),
-      //  Target.CenterPoint.Y - (Canvas.TextHeight(LText) div 2),
-      //  LText);
+      DrawCalibrationPoint(clRed);
     end;
   end;
 
@@ -225,6 +232,9 @@ begin
   inherited Create;
   FAnimating := False;
 
+  FGaze.X := 0;
+  FGaze.Y := 0;
+
   FBitmap := TBGRABitmap.Create;
   FBitmapBack := TBGRABitmap.Create;
 
@@ -242,6 +252,7 @@ begin
   FIndex := 0;
 
   FReducePointSize := False;
+  FMustWaitForRemote := False;
 end;
 
 destructor TAnimation.Destroy;
@@ -264,6 +275,17 @@ begin
   Canvas.FillRect(Rect(0, 0, Canvas.Width, Canvas.Height));
 end;
 
+procedure TAnimation.ClearForeground;
+var
+  Canvas : TBGRACanvas;
+begin
+  Canvas := FBitmap.CanvasBGRA;
+  Canvas.Pen.Width := 1;
+  Canvas.Pen.Color := clBlack;
+  Canvas.Brush.Color := clBlack;
+  Canvas.FillRect(Rect(0, 0, Canvas.Width, Canvas.Height));
+end;
+
 procedure TAnimation.PaintBackPoint(X, Y: Integer);
 var
   Canvas : TBGRACanvas;
@@ -278,7 +300,10 @@ end;
 
 procedure TAnimation.Reset;
 begin
+  FTimer.Enabled := False;
   FIndex := 0;
+  FState := Waiting;
+  Invalidate;
 end;
 
 procedure TAnimation.SetSize(Width, Height: Integer);

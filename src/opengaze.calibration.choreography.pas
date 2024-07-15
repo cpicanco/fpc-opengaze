@@ -14,7 +14,7 @@ unit opengaze.calibration.choreography;
 interface
 
 uses
-  Classes, SysUtils, opengaze.types, choreographies;
+  Classes, SysUtils, opengaze.types, opengaze.events, choreographies;
 
 type
 
@@ -24,14 +24,21 @@ type
   private
     FOnPointStart : TOpenGazeEvent;
     FOnPointEnd   : TOpenGazeEvent;
+    FEvents : TOpenGazeEvents;
+    function GetVisible: Boolean;
+    procedure SetEvents(AValue: TOpenGazeEvents);
     procedure SetOnPointEnd(AValue: TOpenGazeEvent);
     procedure SetOnPointStart(AValue: TOpenGazeEvent);
+    procedure ReceiveGazePoint(Sender: TObject; RawTag : TRawTag);
+    procedure SetVisible(AValue: Boolean);
   public
     constructor Create;
     destructor Destroy; override;
     procedure SelectNextScreen;
     property OnPointStart : TOpenGazeEvent read FOnPointStart write SetOnPointStart;
     property OnPointEnd : TOpenGazeEvent read FOnPointEnd write SetOnPointEnd;
+    property Events : TOpenGazeEvents read FEvents write SetEvents;
+    property Visible : Boolean read GetVisible write SetVisible;
   end;
 
 
@@ -40,7 +47,7 @@ var
 
 implementation
 
-uses Forms, Controls, forms.background;
+uses Forms, Controls, forms.background, opengaze.helpers, screen.helpers;
 
 { TOpenGazeCalibrationChoreography }
 
@@ -51,6 +58,18 @@ begin
   FOnPointEnd := AValue;
 end;
 
+procedure TOpenGazeCalibrationChoreography.SetEvents(AValue: TOpenGazeEvents);
+begin
+  if FEvents = AValue then Exit;
+  FEvents := AValue;
+  FEvents.OnDataReceived := @ReceiveGazePoint;
+end;
+
+function TOpenGazeCalibrationChoreography.GetVisible: Boolean;
+begin
+  Result := FormBackground.Visible;
+end;
+
 procedure TOpenGazeCalibrationChoreography.SetOnPointStart(
   AValue: TOpenGazeEvent);
 begin
@@ -58,14 +77,30 @@ begin
   FOnPointStart := AValue;
 end;
 
+procedure TOpenGazeCalibrationChoreography.ReceiveGazePoint(
+  Sender: TObject; RawTag: TRawTag);
+const
+  BPOGX = 14; { if you want a dictionary }
+  BPOGY = 15; { use TOpenGazeEvent instead of TGazeDataEvent}
+var
+  LX : integer;
+  LY : integer;
+begin
+  LX := RawTag.Pairs[BPOGX].Value.ToFloat.Denormalize(FormBackground.Width);
+  LY := RawTag.Pairs[BPOGY].Value.ToFloat.Denormalize(FormBackground.Height);
+  FAnimation.Gaze := Point(LX, LY);
+  FAnimation.Paint;
+end;
+
+procedure TOpenGazeCalibrationChoreography.SetVisible(AValue: Boolean);
+begin
+  if FormBackground.Visible = AValue then Exit;
+  FormBackground.Visible := AValue;
+end;
+
 constructor TOpenGazeCalibrationChoreography.Create;
 begin
   FormBackground := TFormBackground.CreateNew(nil);
-  FormBackground.BorderStyle := bsNone;
-  FormBackground.WindowState := wsFullScreen;
-  FormBackground.Color := 0;
-  FormBackground.Width := Screen.Width;
-  FormBackground.Height := Screen.Height;
   inherited Create(FormBackground);
 end;
 

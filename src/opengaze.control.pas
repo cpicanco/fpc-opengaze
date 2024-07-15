@@ -33,7 +33,7 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure StartCalibration;
-    property Events : TOpenGazeEvents read FIncomingEvents;
+    property Events : TOpenGazeEvents read FEvents;
     property Calibration : TOpenGazeCalibration read FCalibration;
     property Recording : TOpenGazeRecording read FRecording;
   end;
@@ -45,8 +45,8 @@ constructor TOpenGazeControlClient.Create;
 begin
   inherited Create;
   FSocket.Server := OpenGazeControlServer;
-  FCalibration := TOpenGazeCalibration.Create(FSocket, FIncomingEvents);
-  FRecording := TOpenGazeRecording.Create(FSocket, FIncomingEvents);
+  FCalibration := TOpenGazeCalibration.Create(FSocket, FEvents);
+  FRecording := TOpenGazeRecording.Create(FSocket, FEvents);
 end;
 
 destructor TOpenGazeControlClient.Destroy;

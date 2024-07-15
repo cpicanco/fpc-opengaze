@@ -41,7 +41,7 @@ constructor TOpenGazeAnalysisClient.Create;
 begin
   inherited Create;
   FSocket.Server := OpenGazeAnalysisServer;
-  FRecording := TOpenGazeRecording.Create(FSocket, FIncomingEvents);
+  FRecording := TOpenGazeRecording.Create(FSocket, FEvents);
 end;
 
 destructor TOpenGazeAnalysisClient.Destroy;

@@ -40,6 +40,10 @@ type
   TIntegerOpenGazeHelper = type helper (TIntegerHelper) for Integer
     function ToPointsArray : TStringArray;
     function ToValueArray  : TStringArray;
+    function ToXArray : TStringArray;
+    function ToYArray : TStringArray;
+    function ToWidthArray : TStringArray;
+    function ToHeightArray : TStringArray;
   end;
 
   { TStringOpenGazeHelper }
@@ -94,6 +98,26 @@ end;
 function TIntegerOpenGazeHelper.ToValueArray: TStringArray;
 begin
   Result := [VALUE, Self.ToString]
+end;
+
+function TIntegerOpenGazeHelper.ToXArray: TStringArray;
+begin
+  Result := [XCOORDENATE, Self.ToString];
+end;
+
+function TIntegerOpenGazeHelper.ToYArray: TStringArray;
+begin
+  Result := [YCOORDENATE, Self.ToString];
+end;
+
+function TIntegerOpenGazeHelper.ToWidthArray: TStringArray;
+begin
+  Result := [SCREEN_WIDTH, Self.ToString];
+end;
+
+function TIntegerOpenGazeHelper.ToHeightArray: TStringArray;
+begin
+  Result := [SCREEN_HEIGHT, Self.ToString];
 end;
 
 { TStringOpenGazeHelper }

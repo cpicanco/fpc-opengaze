@@ -29,6 +29,9 @@ type
   { TCalibrationChoreography }
 
   TCalibrationChoreography = class
+  private
+    function GetBoundsRect: TRect;
+    procedure SetBoundsRect(AValue: TRect);
   protected
     FBackground : TCustomControl;
     FAnimation  : TAnimation;
@@ -44,6 +47,7 @@ type
     function GetPoints(AN: integer = 3;
       Coreography: TCoreography = nil): TNormalizedPoints;
     property Animation : TAnimation read FAnimation;
+    property BoundsRect : TRect read GetBoundsRect write SetBoundsRect;
   end;
 
 implementation
@@ -55,6 +59,17 @@ var
 
 
 { TCalibrationChoreography }
+
+function TCalibrationChoreography.GetBoundsRect: TRect;
+begin
+  Result := FBackground.BoundsRect;
+end;
+
+procedure TCalibrationChoreography.SetBoundsRect(AValue: TRect);
+begin
+  FBackground.BoundsRect := AValue;
+  FBackground.Invalidate;
+end;
 
 procedure TCalibrationChoreography.Paint(Sender: TObject);
 var
@@ -137,8 +152,9 @@ end;
 
 procedure TCalibrationChoreography.Stop;
 begin
-  FAnimation.Reset;
   FAnimation.ClearBackground;
+  FAnimation.ClearForeground;
+  FAnimation.Reset;
 end;
 
 procedure TCalibrationChoreography.SetPoints(
@@ -161,6 +177,7 @@ end;
 
 initialization
   DefaultCoreography := TCoreography.Create(5, 1, 3, 9, 7, 5);
+  //DefaultCoreography := TCoreography.Create(5, 1, 2, 3, 4, 5, 6, 7, 8, 9);
 
 end.
 

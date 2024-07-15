@@ -14,14 +14,23 @@ unit forms.background;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics;
+  Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, ExtCtrls;
 
 type
 
   { TFormBackground }
 
   TFormBackground = class(TForm)
+  private
+    FForm  : TForm;
+    FLabel : TLabel;
+    FTimer : TTimer;
+    procedure TimerOnTimerStart(Sender: TObject);
+    procedure TimerOnTimerStop(Sender: TObject);
+    procedure TimerOnTimer(Sender: TObject);
   public
+    constructor CreateNew(TheOwner: TComponent; Num: integer = 0); override;
+    destructor Destroy; override;
     function MoveToNextMonitor : integer;
   end;
 
@@ -34,12 +43,84 @@ implementation
 
 { TFormBackground }
 
+procedure TFormBackground.TimerOnTimerStart(Sender: TObject);
+begin
+  FForm.BoundsRect := Self.BoundsRect;
+  if not FForm.Visible then begin
+    FForm. Show;
+  end;
+
+  if not FLabel.Visible then begin
+    FLabel.Show;
+  end;
+end;
+
+procedure TFormBackground.TimerOnTimerStop(Sender: TObject);
+begin
+  if FLabel.Visible then begin
+    FLabel.Hide;
+  end;
+
+  if FForm.Visible then begin
+    FForm.Hide;
+  end;
+end;
+
+procedure TFormBackground.TimerOnTimer(Sender: TObject);
+begin
+  FTimer.Enabled := False;
+end;
+
+constructor TFormBackground.CreateNew(TheOwner: TComponent; Num: integer);
+begin
+  inherited CreateNew(TheOwner, Num);
+  BorderStyle := bsNone;
+  WindowState := wsFullScreen;
+  Color := 0;
+  Width := Screen.Width;
+  Height := Screen.Height;
+
+  FForm := TForm.CreateNew(nil);
+  FForm.Width := Screen.Width;
+  FForm.Height := Screen.Height;
+  FForm.BorderStyle := bsNone;
+  FForm.WindowState := wsFullScreen;
+  FForm.Color:=clBlack;
+
+  FTimer := TTimer.Create(Self);
+  FTimer.Enabled := False;
+  FTimer.Interval := 1000;
+  FTimer.OnStartTimer := @TimerOnTimerStart;
+  FTimer.OnStopTimer := @TimerOnTimerStop;
+  FTimer.OnTimer := @TimerOnTimer;
+
+  FLabel := TLabel.Create(Self);
+  FLabel.Align := alClient;
+  FLabel.Alignment := taCenter;
+  FLabel.Layout := tlCenter;
+  FLabel.Font.Size := Round(100 * (Width/Screen.PrimaryMonitor.Width));
+  FLabel.Font.Bold := True;
+  FLabel.Font.Color := clWhite;
+  FLabel.Caption := '';
+  FLabel.Visible := False;
+  FLabel.Parent := FForm;
+end;
+
+destructor TFormBackground.Destroy;
+begin
+  FForm.Free;
+  FLabel.Free;
+  inherited Destroy;
+end;
+
 function TFormBackground.MoveToNextMonitor: integer;
 var
   IsInsideMonitor: Boolean = False;
   i: Integer;
 begin
   Result := 0;
+
+  if FTimer.Enabled then Exit;
 
   if Screen.MonitorCount < 2 then begin
     Exit;
@@ -63,6 +144,8 @@ begin
   end;
 
   BoundsRect := Forms.Screen.Monitors[i].BoundsRect;
+  FLabel.Caption := Format('%d:%d', [BoundsRect.Width, BoundsRect.Height]);
+  FTimer.Enabled := True;
   Result := i;
 end;
 

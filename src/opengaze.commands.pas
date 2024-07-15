@@ -38,6 +38,8 @@ type
     function SetReset : string;
     function GetReset : string;
     function AddPoint(X, Y : Float) : string;
+    function SetScreenSize(Left, Top, Width, Height : integer) : string;
+    function GetScreenSize : string;
     function GetPoints : string;
   end;
 
@@ -60,6 +62,8 @@ type
     function DisableSendPointOfGazeRight : string;
     function EnableSendPointOfGazeBest : string;
     function DisableSendPointOfGazeBest : string;
+    function EnableSendAssistiveCommunicationPointOfGaze : string;
+    function DisableSendAssistiveCommunicationPointOfGaze : string;
     function EnableSendPupilLeft : string;
     function DisableSendPupilLeft : string;
     function EnableSendPupilRight : string;
@@ -70,8 +74,26 @@ type
     function DisableSend3DEyeRight : string;
     function EnableSendCursor : string;
     function DisableSendCursor : string;
+    function EnableSendKeyboardInput : string;
+    function DisableSendKeybordInput : string;
     function EnableSendBlink : string;
     function DisableSendBlink : string;
+    function EnableSendPupilInMillimeters : string;
+    function DisableSendPupilInMillimeters : string;
+    function EnableSendDial : string;
+    function DisableSendDial : string;
+    function EnableSendGalvanicSkinResponse : string;
+    function DisableSendGalvanicSkinResponse : string;
+    function EnableSendHeartRate : string;
+    function DisableSendHeartRate : string;
+    function EnableSendHeartRatePulse : string;
+    function DisableSendHeartRatePulse : string;
+    function EnableSendHeartBeatInterbeatInterval : string;
+    function DisableSendHeartBeatInterbeatInterval : string;
+    function EnableSendTransistorTransistorLogicInputOutput : string;
+    function DisableSendTransistorTransistorLogicInputOutput : string;
+    function EnableSendPixelConversionFactor : string;
+    function DisableSendPixelConversionFacotr : string;
     function EnableSendUserData : string;
     function DisableSendUserData : string;
   end;
@@ -132,7 +154,10 @@ begin
         s := String.Join(TAB, HEADER_RIGHT_POINT_OF_GAZE);
 
       TOpenGazeID.ENABLE_SEND_POG_BEST :
-        s := String.Join(TAB, HEADER_BEST_POINT_OF_GAZER);
+        s := String.Join(TAB, HEADER_BEST_POINT_OF_GAZE);
+
+      TOpenGazeID.ENABLE_SEND_POG_AAC:
+        s := String.Join(TAB, HEADER_AAC_POINT_OF_GAZE);
 
       TOpenGazeID.ENABLE_SEND_PUPIL_LEFT :
         s := String.Join(TAB, HEADER_LEFT_PUPIL);
@@ -149,11 +174,38 @@ begin
       TOpenGazeID.ENABLE_SEND_CURSOR :
         s := String.Join(TAB, HEADER_CURSOR_POSITION);
 
-      TOpenGazeID.ENABLE_SEND_USER_DATA :
-        s := String.Join(TAB, HEADER_USER_DATA);
+      TOpenGazeID.ENABLE_SEND_KB :
+        s := String.Join(TAB, HEADER_KB);
 
       TOpenGazeID.ENABLE_SEND_BLINK :
         s := String.Join(TAB, HEADER_BLINK_DATA);
+
+      TOpenGazeID.ENABLE_SEND_PUPILMM :
+        s := String.Join(TAB, HEADER_PUPILMM);
+
+      TOpenGazeID.ENABLE_SEND_DIAL :
+        s := String.Join(TAB, HEADER_DIAL);
+
+      TOpenGazeID.ENABLE_SEND_GSR :
+        s := String.Join(TAB, HEADER_GSR);
+
+      TOpenGazeID.ENABLE_SEND_HR :
+        s := String.Join(TAB, HEADER_HR);
+
+      TOpenGazeID.ENABLE_SEND_HR_PULSE :
+        s := String.Join(TAB, HEADER_HR_PULSE);
+
+      TOpenGazeID.ENABLE_SEND_HR_IBI :
+        s := String.Join(TAB, HEADER_HR_IBI);
+
+      TOpenGazeID.ENABLE_SEND_TTL :
+        s := String.Join(TAB, HEADER_TTL);
+
+      TOpenGazeID.ENABLE_SEND_PIX :
+        s := String.Join(TAB, HEADER_PIX);
+
+      TOpenGazeID.ENABLE_SEND_USER_DATA :
+              s := String.Join(TAB, HEADER_USER_DATA);
 
       otherwise begin
         raise Exception.Create('Uknown command.');
@@ -244,6 +296,19 @@ function TCalibrationCommands.AddPoint(X, Y: Float): string;
 begin
   Result :=
     ParseStr(CLIENT_SET, CALIBRATE_ADDPOINT, Concat(X.ToXArray, Y.ToYArray));
+end;
+
+function TCalibrationCommands.SetScreenSize(Left, Top,
+  Width, Height: integer): string;
+begin
+  Result :=
+    ParseStr(CLIENT_SET, SCREEN_SIZE, Concat(
+      Left.ToXArray, Top.ToYArray, Width.ToWidthArray, Height.ToHeightArray));
+end;
+
+function TCalibrationCommands.GetScreenSize: string;
+begin
+  Result := ParseStr(CLIENT_GET, SCREEN_SIZE, []);
 end;
 
 function TCalibrationCommands.GetPoints: string;
@@ -347,6 +412,18 @@ begin
   EnabledSendDataCommands := EnabledSendDataCommands-[TOpenGazeID.ENABLE_SEND_POG_BEST];
 end;
 
+function TRecordingCommands.EnableSendAssistiveCommunicationPointOfGaze: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_POG_AAC, True.ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands+[TOpenGazeID.ENABLE_SEND_POG_AAC];
+end;
+
+function TRecordingCommands.DisableSendAssistiveCommunicationPointOfGaze: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_POG_AAC, False.ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands-[TOpenGazeID.ENABLE_SEND_POG_AAC];
+end;
+
 function TRecordingCommands.EnableSendPupilLeft: string;
 begin
   Result := ParseStr(CLIENT_SET, ENABLE_SEND_PUPIL_LEFT, True.ToStateArray);
@@ -407,6 +484,18 @@ begin
   EnabledSendDataCommands := EnabledSendDataCommands-[TOpenGazeID.ENABLE_SEND_CURSOR];
 end;
 
+function TRecordingCommands.EnableSendKeyboardInput: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_KB, True.ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands+[TOpenGazeID.ENABLE_SEND_KB];
+end;
+
+function TRecordingCommands.DisableSendKeybordInput: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_KB, False.ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands-[TOpenGazeID.ENABLE_SEND_KB];
+end;
+
 function TRecordingCommands.EnableSendBlink: string;
 begin
   Result := ParseStr(CLIENT_SET, ENABLE_SEND_BLINK, True.ToStateArray);
@@ -417,6 +506,103 @@ function TRecordingCommands.DisableSendBlink: string;
 begin
   Result := ParseStr(CLIENT_SET, ENABLE_SEND_BLINK, False.ToStateArray);
   EnabledSendDataCommands := EnabledSendDataCommands-[TOpenGazeID.ENABLE_SEND_BLINK];
+end;
+
+function TRecordingCommands.EnableSendPupilInMillimeters: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_PUPILMM, True.ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands+[TOpenGazeID.ENABLE_SEND_PUPILMM];
+end;
+
+function TRecordingCommands.DisableSendPupilInMillimeters: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_PUPILMM, False.ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands-[TOpenGazeID.ENABLE_SEND_PUPILMM];
+end;
+
+function TRecordingCommands.EnableSendDial: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_DIAL, True.ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands+[TOpenGazeID.ENABLE_SEND_DIAL];
+end;
+
+function TRecordingCommands.DisableSendDial: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_DIAL, False.ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands-[TOpenGazeID.ENABLE_SEND_DIAL];
+end;
+
+function TRecordingCommands.EnableSendGalvanicSkinResponse: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_GSR, True.ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands+[TOpenGazeID.ENABLE_SEND_GSR];
+end;
+
+function TRecordingCommands.DisableSendGalvanicSkinResponse: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_GSR, False.ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands-[TOpenGazeID.ENABLE_SEND_GSR];
+end;
+
+function TRecordingCommands.EnableSendHeartRate: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_HR, True.ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands+[TOpenGazeID.ENABLE_SEND_HR];
+end;
+
+function TRecordingCommands.DisableSendHeartRate: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_HR, False.ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands-[TOpenGazeID.ENABLE_SEND_HR];
+end;
+
+function TRecordingCommands.EnableSendHeartRatePulse: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_HR_PULSE, True.ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands+[TOpenGazeID.ENABLE_SEND_HR_PULSE];
+end;
+
+function TRecordingCommands.DisableSendHeartRatePulse: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_HR_PULSE, False.ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands-[TOpenGazeID.ENABLE_SEND_HR_PULSE];
+end;
+
+function TRecordingCommands.EnableSendHeartBeatInterbeatInterval: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_HR_IBI, True.ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands+[TOpenGazeID.ENABLE_SEND_HR_IBI];
+end;
+
+function TRecordingCommands.DisableSendHeartBeatInterbeatInterval: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_HR_IBI, False.ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands-[TOpenGazeID.ENABLE_SEND_HR_IBI];
+end;
+
+function TRecordingCommands.EnableSendTransistorTransistorLogicInputOutput: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_TTL, True.ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands+[TOpenGazeID.ENABLE_SEND_TTL];
+end;
+
+function TRecordingCommands.DisableSendTransistorTransistorLogicInputOutput: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_TTL, False
+  .ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands-[TOpenGazeID.ENABLE_SEND_TTL];
+end;
+
+function TRecordingCommands.EnableSendPixelConversionFactor: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_PIX, True.ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands+[TOpenGazeID.ENABLE_SEND_PIX];
+end;
+
+function TRecordingCommands.DisableSendPixelConversionFacotr: string;
+begin
+  Result := ParseStr(CLIENT_SET, ENABLE_SEND_PIX, False.ToStateArray);
+  EnabledSendDataCommands := EnabledSendDataCommands-[TOpenGazeID.ENABLE_SEND_PIX];
 end;
 
 function TRecordingCommands.EnableSendUserData: string;
