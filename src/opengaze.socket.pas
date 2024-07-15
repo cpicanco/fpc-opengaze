@@ -31,7 +31,7 @@ type
     FIP: string;
     FPort: string;
     FIsBlocked : Boolean;
-    FLastBlockedRawTag: TRawTag;
+    FLastBlockedCommand: string;
     function GetConnected: Boolean;
     function GetIsBlocked: Boolean;
     procedure SeTOpenGazeServer(AValue: TOpenGazeServer);
@@ -42,6 +42,7 @@ type
     destructor Destroy; override;
     procedure Connect;
     procedure Disconnect;
+    procedure Unblock;
     procedure Send(Command : string); overload;
     procedure Request(Command : string; var Reply : TRawTag;
       Timeout : Integer = MaxInt); overload;
@@ -50,10 +51,10 @@ type
     property Port: string read FPort write FPort;
     property Lock: TCriticalSection read FLock;
     property Event: TEvent read FEvent write FEvent;
-    property IsBlocked : Boolean read GetIsBlocked;
+    property IsBlocked : Boolean read GetIsBlocked write SetIsBlocked;
     property Connected: Boolean read GetConnected;
     property Server : TOpenGazeServer read FOpenGazeServer write SeTOpenGazeServer;
-    property LastBlockedRawTag : TRawTag read FLastBlockedRawTag write FLastBlockedRawTag;
+    property LastBlockedCommand : string read FLastBlockedCommand write FLastBlockedCommand;
   end;
 
 
@@ -106,12 +107,7 @@ end;
 
 function TOpenGazeSocket.Block(TimeOut: integer): TWaitResult;
 begin
-  SetIsBlocked(True);
-  try
-    Result := Event.WaitFor(Timeout);
-  finally
-    SetIsBlocked(False);
-  end;
+  Result := Event.WaitFor(Timeout);
 end;
 
 constructor TOpenGazeSocket.Create;
@@ -165,6 +161,17 @@ begin
   end;
 end;
 
+procedure TOpenGazeSocket.Unblock;
+begin
+  FEvent.SetEvent;
+  FLock.Acquire;
+  try
+    FIsBlocked := False;
+  finally
+    FLock.Release;
+  end;
+end;
+
 procedure TOpenGazeSocket.Send(Command: string);
 begin
   {$IFDEF DEBUG}
@@ -179,23 +186,25 @@ begin
   {$IFDEF DEBUG}
   Write(Command);
   {$ENDIF}
-  FTCP.SendString(Command);
+
   FLock.Acquire;
   try
-    FLastBlockedRawTag := ParseXML(Command);
+    FLastBlockedCommand := Command;
+    FIsBlocked := True;
   finally
     FLock.Release;
   end;
 
+  FTCP.SendString(Command);
   case Block(Timeout) of
     wrSignaled : begin
       FLock.Acquire;
       try
-        Reply := FLastBlockedRawTag;
+        Reply := ParseXML(FLastBlockedCommand);
         {$IFDEF DEBUG}
         Write(ParseStr(Reply.Tag, Reply.Pairs));
         {$ENDIF}
-        FLastBlockedRawTag := Default(TRawTag);
+        FLastBlockedCommand := '';
       finally
         FLock.Release;
       end;

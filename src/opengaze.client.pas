@@ -18,7 +18,10 @@ uses
   opengaze.types,
   opengaze.socket,
   opengaze.incoming,
-  opengaze.events;
+  opengaze.worker,
+  opengaze.worker.raw,
+  opengaze.events,
+  opengaze.queues;
 
 type
 
@@ -26,16 +29,18 @@ type
 
   TOpenGazeBaseClient = class
   private
+    FCommands : TThreadStringQueue;
+    FWorkerThread : TWorkerThread;
     FIncomingThread : TIncomingThread;
   protected
     FSocket: TOpenGazeSocket;
-    FIncomingEvents : TOpenGazeEvents;
+    FEvents : TOpenGazeEvents;
   public
     constructor Create;
     destructor Destroy; override;
     procedure Connect;
     procedure Disconnect;
-    property Events : TOpenGazeEvents read FIncomingEvents;
+    property Events : TOpenGazeEvents read FEvents;
   end;
 
 
@@ -47,16 +52,20 @@ constructor TOpenGazeBaseClient.Create;
 begin
   inherited Create;
   FSocket := TOpenGazeSocket.Create;
-  FIncomingEvents := TOpenGazeEvents.Create;
+  FCommands := TThreadStringQueue.Create;
+  FEvents := TOpenGazeEvents.Create;
+
   FIncomingThread := nil;
+  FWorkerThread := nil;
 end;
 
 destructor TOpenGazeBaseClient.Destroy;
 begin
-  FIncomingEvents.Free;
+  FEvents.Free;
 
   Disconnect;
 
+  FCommands.Free;
   FSocket.Free;
   inherited Destroy;
 end;
@@ -67,13 +76,31 @@ begin
   FSocket.Connect;
   if FSocket.Connected then begin
     FIncomingThread := TIncomingThread.Create(FSocket);
-    FIncomingEvents.IncomingThread := FIncomingThread;
+    FIncomingThread.Commands := FCommands;
+
+    FWorkerThread := TWorkerThread.Create(FSocket);
+    FWorkerThread.Commands := FCommands;
+
+    FEvents.WorkerThread := FWorkerThread;
+
+    FWorkerThread.Start;
     FIncomingThread.Start;
   end;
 end;
 
 procedure TOpenGazeBaseClient.Disconnect;
 begin
+  if Assigned(FWorkerThread) then begin
+    if FWorkerThread.Suspended then begin
+      FWorkerThread.Start;
+    end;
+
+    FWorkerThread.Terminate;
+    FCommands.SetEvent;
+  end;
+
+  FWorkerThread := nil;
+
   if Assigned(FIncomingThread) then begin
     if FIncomingThread.Suspended then begin
       FIncomingThread.Start;

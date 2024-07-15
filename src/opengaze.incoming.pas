@@ -12,8 +12,7 @@ unit opengaze.incoming;
 interface
 
 uses
-  Classes, SysUtils, SyncObjs,
-  opengaze.socket, opengaze.types, opengaze.queues;
+  Classes, SysUtils, opengaze.socket, opengaze.types, opengaze.queues;
 
 type
 
@@ -21,111 +20,62 @@ type
 
   TIncomingThread = class(TThread)
   private
-    FOnReceive: TGazeDataEvent;
     FSocket: TOpenGazeSocket;
-    FRXStrings : TThreadStringQueue;
-    FRXPartial : string;
-    procedure Reply;
-    procedure DebugString;
-    procedure SetOnReceive(AValue: TGazeDataEvent);
+    FCommands : TThreadStringQueue;
   protected
     procedure Execute; override;
   public
-    constructor Create(Socket: TOpenGazeSocket); reintroduce;
+    constructor Create(Socket: TOpenGazeSocket);
     destructor Destroy; override;
-    property OnReceive : TGazeDataEvent read FOnReceive write SetOnReceive;
+    property Commands : TThreadStringQueue read FCommands write FCommands;
   end;
 
 implementation
-
-uses synsock, OpenGaze.parser;
 
 { TIncomingThread }
 
 constructor TIncomingThread.Create(Socket: TOpenGazeSocket);
 begin
   inherited Create(True);  // Create suspended
-  FRXPartial := '';
-  FRXStrings := TThreadStringQueue.Create;
   FSocket := Socket;
   FreeOnTerminate := True;
 end;
 
 destructor TIncomingThread.Destroy;
 begin
-  FRXStrings.Free;
   inherited Destroy;
-end;
-
-procedure TIncomingThread.Reply;
-var
-  RXString , Command: string;
-  DelimiterIndex: SizeInt;
-begin
-  RXString := '';
-  RXString := FRXStrings.Dequeue;
-  if RXString.IsEmpty then Exit;
-
-  if not FRXPartial.IsEmpty then begin
-    RXString := FRXPartial + RXString;
-    FRXPartial := '';
-  end;
-
-  repeat
-    DelimiterIndex := Pos(#13#10, RXString);
-    if DelimiterIndex > 0 then begin
-      Command := Copy(RXString, 1, DelimiterIndex+1);
-      {$IFDEF DEBUG}
-      Write(Command);
-      {$ENDIF}
-      OnReceive(Self, ParseXML(Command));
-      Delete(RXString, 1, DelimiterIndex + 1);
-    end;
-  until DelimiterIndex = 0;
-
-  FRXPartial := RXString;
-end;
-
-procedure TIncomingThread.DebugString;
-begin
-  Write(FRXStrings.Dequeue);
-end;
-
-procedure TIncomingThread.SetOnReceive(AValue: TGazeDataEvent);
-begin
-  if FOnReceive = AValue then Exit;
-  FOnReceive := AValue;
 end;
 
 procedure TIncomingThread.Execute;
 var
-  RawTagReceived : TRawTag = (Tag: ERR; ID: NONE; Pairs: nil);
-  RawTagRequested : TRawTag = (Tag: ERR; ID: NONE; Pairs: nil);
-  Commmand: string;
+  RXString, RXPartial, Command: String;
+  DelimiterIndex: SizeInt;
 begin
+  RXPartial := '';
   while not Terminated do begin
-    Commmand := '';
-    Commmand := FSocket.Receive;
-    if FSocket.IsBlocked then begin
-      RawTagReceived := ParseXML(Commmand);
-      RawTagRequested := FSocket.LastBlockedRawTag;
-      case RawTagReceived.Tag of
-        ACK: begin
-          if RawTagRequested.ID = RawTagReceived.ID then begin
-            FSocket.LastBlockedRawTag := RawTagReceived;
-            FSocket.Event.SetEvent;
-            Continue;
-          end;
-        end;
+    RXString := '';
+    RXString := FSocket.Receive;
 
-        otherwise begin
-          { do nothing }
-        end;
-      end;
+    if not RXPartial.IsEmpty then begin
+      RXString := RXPartial + RXString;
+      RXPartial := '';
     end;
 
-    FRXStrings.Enqueue(Commmand);
-    Queue(@Reply);
+    repeat
+      DelimiterIndex := Pos(#13#10, RXString);
+      if DelimiterIndex > 0 then begin
+        Command := '';
+        Command := Copy(RXString, 1, DelimiterIndex+1);
+        FCommands.Enqueue(Command);
+        Delete(RXString, 1, DelimiterIndex+1);
+      end;
+    until DelimiterIndex = 0;
+
+    RXPartial := RXString;
+
+    if FCommands.IsWaiting and FCommands.HasData then begin
+      FCommands.SetEvent;
+    end;
   end;
 end;
 

@@ -17,7 +17,7 @@ uses
   Classes, SysUtils,
   opengaze.constants,
   opengaze.types,
-  opengaze.incoming;
+  opengaze.worker;
 
 type
 
@@ -25,7 +25,7 @@ type
 
   TOpenGazeEvents = class
     private
-      FIncomingThread : TIncomingThread;
+      FWorkerThread : TWorkerThread;
       FOnCalibrationPointResult: TOpenGazeEvent;
       FOnCalibrationPointStart: TOpenGazeEvent;
       FOnCalibrationResult: TOpenGazeEvent;
@@ -37,7 +37,7 @@ type
       FOnStartRecording: TOpenGazeEvent;
       FOnStopCalibration: TOpenGazeEvent;
       FOnStopRecording: TOpenGazeEvent;
-      procedure SetIncomingThread(AValue: TIncomingThread);
+      procedure SetWorkerThread(AValue: TWorkerThread);
       procedure SetOnCalibrationPointResult(AValue: TOpenGazeEvent);
       procedure SetOnCalibrationPointStart(AValue: TOpenGazeEvent);
       procedure SetOnCalibrationResult(AValue: TOpenGazeEvent);
@@ -49,11 +49,12 @@ type
       procedure SetOnStartRecording(AValue: TOpenGazeEvent);
       procedure SetOnStopCalibration(AValue: TOpenGazeEvent);
       procedure SetOnStopRecording(AValue: TOpenGazeEvent);
+      procedure EmptyEvent(Sender : TObject; RawTag : TRawTag);
     public
       constructor Create;
       procedure ProcessTag(Sender: TObject; RawTag: TRawTag);
       destructor Destroy; override;
-      property IncomingThread : TIncomingThread read FIncomingThread write SetIncomingThread;
+      property WorkerThread : TWorkerThread read FWorkerThread write SetWorkerThread;
       property OnStartCalibration : TOpenGazeEvent read FOnStartCalibration write SetOnStartCalibration;
       property OnStopCalibration : TOpenGazeEvent read FOnStopCalibration write SetOnStopCalibration;
       property OnCalibrationResult : TOpenGazeEvent read FOnCalibrationResult write SetOnCalibrationResult;
@@ -161,6 +162,7 @@ begin
     REC : begin
       { implement data logger events here }
       LogLine(RawTag.Pairs);
+      OnDataReceived(Self, RawTag);
     end;
 
     NACK : begin
@@ -173,11 +175,11 @@ begin
   end;
 end;
 
-procedure TOpenGazeEvents.SetIncomingThread(AValue: TIncomingThread);
+procedure TOpenGazeEvents.SetWorkerThread(AValue: TWorkerThread);
 begin
-  if FIncomingThread = AValue then Exit;
-  FIncomingThread := AValue;
-  FIncomingThread.OnReceive := @ProcessTag
+  if FWorkerThread = AValue then Exit;
+  FWorkerThread := AValue;
+  FWorkerThread.OnReceive := @ProcessTag
 end;
 
 procedure TOpenGazeEvents.SetOnCalibrationPointResult(AValue: TOpenGazeEvent);
@@ -247,9 +249,15 @@ begin
   FOnStopRecording := AValue;
 end;
 
+procedure TOpenGazeEvents.EmptyEvent(Sender: TObject; RawTag: TRawTag);
+begin
+  { do nothing }
+end;
+
 constructor TOpenGazeEvents.Create;
 begin
   inherited Create;
+  OnDataReceived := @EmptyEvent;
   FOnStartRecording := nil;
   FOnStopRecording := nil;
   FOnDataReceived := nil;
