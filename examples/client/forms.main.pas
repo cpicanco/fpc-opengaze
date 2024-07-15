@@ -22,27 +22,29 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    ButtonHideCalibration: TButton;
+    ButtonShowCalibration: TButton;
     ButtonNextScreen: TButton;
-    ButtonStopCalibrationRemote: TButton;
-    ButtonStartCalibrationRemote: TButton;
     ButtonStopCalibration: TButton;
     ButtonConnect: TButton;
     ButtonDisconnect: TButton;
     ButtonStartRecording: TButton;
     ButtonStopRecording: TButton;
     ButtonStartCalibration: TButton;
+    CheckBoxUseRemoteServer: TCheckBox;
     ListBox1: TListBox;
     MenuItemSaveToFile: TMenuItem;
     PopupMenu1: TPopupMenu;
     procedure ButtonConnectClick(Sender: TObject);
     procedure ButtonDisconnectClick(Sender: TObject);
+    procedure ButtonHideCalibrationClick(Sender: TObject);
     procedure ButtonNextScreenClick(Sender: TObject);
+    procedure ButtonShowCalibrationClick(Sender: TObject);
     procedure ButtonStartCalibrationClick(Sender: TObject);
-    procedure ButtonStartCalibrationRemoteClick(Sender: TObject);
     procedure ButtonStartRecordingClick(Sender: TObject);
     procedure ButtonStopCalibrationClick(Sender: TObject);
-    procedure ButtonStopCalibrationRemoteClick(Sender: TObject);
     procedure ButtonStopRecordingClick(Sender: TObject);
+    procedure CheckBoxUseRemoteServerChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure MenuItemSaveToFileClick(Sender: TObject);
   private
@@ -57,14 +59,14 @@ var
 
 implementation
 
-uses opengaze, opengaze.logger;
+uses Math, opengaze, opengaze.logger, opengaze.helpers;
 
 {$R *.lfm}
 
 { TForm1 }
 
 var
-  Source : string;
+  FailedCalibrations : integer = 0;
 
 procedure TForm1.ButtonConnectClick(Sender: TObject);
 begin
@@ -76,23 +78,25 @@ begin
   OpenGazeControl.Disconnect;
 end;
 
+procedure TForm1.ButtonHideCalibrationClick(Sender: TObject);
+begin
+  OpenGazeControl.Calibration.Hide;
+end;
+
 procedure TForm1.ButtonNextScreenClick(Sender: TObject);
 begin
-  OpenGazeControl.Calibration.Choreography.SelectNextScreen;
+  OpenGazeControl.Calibration.SelectNextScreen;
+end;
+
+procedure TForm1.ButtonShowCalibrationClick(Sender: TObject);
+begin
+  OpenGazeControl.Calibration.Show;
 end;
 
 procedure TForm1.ButtonStartCalibrationClick(Sender: TObject);
 begin
-  Source := 'Gazepoint';
-  OpenGazeControl.Calibration.UseCustomChoreography := False;
-  OpenGazeControl.Calibration.Show;
-  OpenGazeControl.Calibration.Start;
-end;
-
-procedure TForm1.ButtonStartCalibrationRemoteClick(Sender: TObject);
-begin
-  Source := 'Custom';
-  OpenGazeControl.Calibration.UseCustomChoreography := True;
+  OpenGazeControl.Calibration.UseCustomChoreography :=
+    CheckBoxUseRemoteServer.Checked;
   OpenGazeControl.Calibration.Show;
   OpenGazeControl.Calibration.Start;
 end;
@@ -107,15 +111,15 @@ begin
   OpenGazeControl.Calibration.Stop;
 end;
 
-procedure TForm1.ButtonStopCalibrationRemoteClick(Sender: TObject);
-begin
-  OpenGazeControl.Calibration.Stop;
-end;
-
 procedure TForm1.ButtonStopRecordingClick(Sender: TObject);
 begin
   OpenGazeControl.Recording.Stop;
   ListBox1.Items.AddStrings(Data as TStrings);
+end;
+
+procedure TForm1.CheckBoxUseRemoteServerChange(Sender: TObject);
+begin
+
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -145,13 +149,30 @@ begin
 end;
 
 procedure TForm1.EndCalibration(Sender: TObject; Event: TPairsDictionary);
+var
+  CalibrationType : string;
+  ResultSummary : string;
 begin
+  ResultSummary := OpenGazeControl.Calibration.ResultSummary;
+  if CheckBoxUseRemoteServer.Checked then begin
+    CalibrationType := 'Custom';
+  end else begin
+    CalibrationType := 'Gazepoint';
+  end;
   //UpdateList(Sender, Event);
   OpenGazeControl.Calibration.Stop;
-  OpenGazeControl.Calibration.Hide;
-  ListBox1.Items.Add(Source + #9 + OpenGazeControl.Calibration.ResultSummary);
+  //OpenGazeControl.Calibration.Hide;
+  ListBox1.Items.Add(
+    CalibrationType + #9 + ResultSummary);
 
-  Source := '';
+  if ResultSummary.ToFloat > 40 then begin
+    Inc(FailedCalibrations);
+    if FailedCalibrations > 5 then begin
+      Exit;
+    end else begin
+      ButtonStartCalibrationClick(Sender);
+    end;
+  end;
 end;
 
 end.

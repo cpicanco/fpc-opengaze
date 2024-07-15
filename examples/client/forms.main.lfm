@@ -1,112 +1,124 @@
 object Form1: TForm1
-  Left = 492
-  Height = 476
-  Top = 171
-  Width = 389
+  Left = 745
+  Height = 491
+  Top = 132
+  Width = 372
   Caption = 'Form1'
+  ChildSizing.LeftRightSpacing = 5
+  ChildSizing.TopBottomSpacing = 5
+  ChildSizing.HorizontalSpacing = 5
   ChildSizing.EnlargeHorizontal = crsScaleChilds
   ChildSizing.Layout = cclLeftToRightThenTopToBottom
   ChildSizing.ControlsPerLine = 2
-  ClientHeight = 476
-  ClientWidth = 389
+  ClientHeight = 491
+  ClientWidth = 372
   LCLVersion = '3.99.0.0'
   OnCreate = FormCreate
-  object ButtonConnect: TButton
-    Left = 0
+  object ButtonNextScreen: TButton
+    Left = 5
     Height = 25
-    Top = 0
-    Width = 198
+    Top = 5
+    Width = 176
+    Caption = 'Select Next Screen'
+    TabOrder = 7
+    OnClick = ButtonNextScreenClick
+  end
+  object CheckBoxUseRemoteServer: TCheckBox
+    Left = 186
+    Height = 25
+    Top = 5
+    Width = 181
+    Caption = 'Using Remote Server'
+    TabOrder = 10
+    OnChange = CheckBoxUseRemoteServerChange
+  end
+  object ButtonConnect: TButton
+    Left = 5
+    Height = 25
+    Top = 30
+    Width = 176
     Caption = 'Connect'
     TabOrder = 0
     OnClick = ButtonConnectClick
   end
   object ButtonDisconnect: TButton
-    Left = 198
+    Left = 186
     Height = 25
-    Top = 0
-    Width = 198
+    Top = 30
+    Width = 181
     Caption = 'Disconnect'
     TabOrder = 1
     OnClick = ButtonDisconnectClick
   end
   object ButtonStartRecording: TButton
-    Left = 0
+    Left = 5
     Height = 25
-    Top = 25
-    Width = 198
+    Top = 55
+    Width = 176
     Caption = 'Start Recording'
     TabOrder = 2
     OnClick = ButtonStartRecordingClick
   end
   object ButtonStopRecording: TButton
-    Left = 198
+    Left = 186
     Height = 25
-    Top = 25
-    Width = 198
+    Top = 55
+    Width = 181
     Caption = 'Stop Recording'
     TabOrder = 3
     OnClick = ButtonStopRecordingClick
   end
-  object ButtonStartCalibration: TButton
-    Left = 0
+  object ButtonShowCalibration: TButton
+    Left = 5
     Height = 25
-    Top = 50
-    Width = 198
+    Top = 80
+    Width = 176
+    Caption = 'Show Calibration'
+    TabOrder = 8
+    OnClick = ButtonShowCalibrationClick
+  end
+  object ButtonHideCalibration: TButton
+    Left = 186
+    Height = 25
+    Top = 80
+    Width = 181
+    Caption = 'Hide Calibration'
+    TabOrder = 9
+    OnClick = ButtonHideCalibrationClick
+  end
+  object ButtonStartCalibration: TButton
+    Left = 5
+    Height = 25
+    Top = 105
+    Width = 176
     Caption = 'Start Calibration'
     TabOrder = 4
     OnClick = ButtonStartCalibrationClick
   end
+  object ButtonStopCalibration: TButton
+    Left = 186
+    Height = 25
+    Top = 105
+    Width = 181
+    Caption = 'Stop Calibration'
+    TabOrder = 6
+    OnClick = ButtonStopCalibrationClick
+  end
   object ListBox1: TListBox
-    Left = 0
+    Left = 5
     Height = 332
-    Top = 144
-    Width = 389
+    Top = 154
+    Width = 362
     Align = alBottom
     ItemHeight = 0
     PopupMenu = PopupMenu1
     TabOrder = 5
   end
-  object ButtonStopCalibration: TButton
-    Left = 198
-    Height = 25
-    Top = 50
-    Width = 198
-    Caption = 'Stop Calibration'
-    TabOrder = 6
-    OnClick = ButtonStopCalibrationClick
-  end
-  object ButtonStartCalibrationRemote: TButton
-    Left = 0
-    Height = 25
-    Top = 75
-    Width = 198
-    Caption = 'Start Calibration (Remote Server)'
-    TabOrder = 7
-    OnClick = ButtonStartCalibrationRemoteClick
-  end
-  object ButtonStopCalibrationRemote: TButton
-    Left = 198
-    Height = 25
-    Top = 75
-    Width = 198
-    Caption = 'Stop Calibration (Remote Server)'
-    TabOrder = 8
-    OnClick = ButtonStopCalibrationRemoteClick
-  end
-  object ButtonNextScreen: TButton
-    Left = 0
-    Height = 25
-    Top = 100
-    Width = 198
-    Caption = 'Select Next Screen'
-    TabOrder = 9
-    OnClick = ButtonNextScreenClick
-  end
   object PopupMenu1: TPopupMenu
     Left = 336
     Top = 104
     object MenuItemSaveToFile: TMenuItem
-      Caption = 'MenuItemSaveToFile'
+      Caption = 'Save To File'
       OnClick = MenuItemSaveToFileClick
     end
   end
