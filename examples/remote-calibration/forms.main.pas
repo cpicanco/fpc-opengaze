@@ -53,7 +53,7 @@ uses
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  OpenGazeControl.Events.OnCalibrationResult := @DoCalibrationResult;
+  OpenGazeControl.Calibration.OnResult := @DoCalibrationResult;
   OpenGazeControl.Calibration.UseCustomChoreography :=
     CheckBoxUseCustomChoreography.Checked;
 end;
@@ -63,6 +63,7 @@ procedure TForm1.DoCalibrationResult(Sender: TObject;
 var
   Key : string;
 begin
+  OpenGazeControl.Calibration.Stop;
   OpenGazeControl.Calibration.Hide;
 
   for Key in Event.Keys do begin

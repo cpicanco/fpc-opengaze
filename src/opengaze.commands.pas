@@ -75,7 +75,7 @@ type
     function EnableSendCursor : string;
     function DisableSendCursor : string;
     function EnableSendKeyboardInput : string;
-    function DisableSendKeybordInput : string;
+    function DisableSendKeyboardInput : string;
     function EnableSendBlink : string;
     function DisableSendBlink : string;
     function EnableSendPupilInMillimeters : string;
@@ -490,7 +490,7 @@ begin
   EnabledSendDataCommands := EnabledSendDataCommands+[TOpenGazeID.ENABLE_SEND_KB];
 end;
 
-function TRecordingCommands.DisableSendKeybordInput: string;
+function TRecordingCommands.DisableSendKeyboardInput: string;
 begin
   Result := ParseStr(CLIENT_SET, ENABLE_SEND_KB, False.ToStateArray);
   EnabledSendDataCommands := EnabledSendDataCommands-[TOpenGazeID.ENABLE_SEND_KB];
