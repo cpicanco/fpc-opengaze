@@ -49,7 +49,8 @@ type
       procedure SetOnStartRecording(AValue: TOpenGazeEvent);
       procedure SetOnStopCalibration(AValue: TOpenGazeEvent);
       procedure SetOnStopRecording(AValue: TOpenGazeEvent);
-      procedure EmptyEvent(Sender : TObject; RawTag : TRawTag);
+      procedure EmptyDataEvent(Sender : TObject; RawTag : TRawTag);
+      procedure EmptyGazeEvent(Sender : TObject; Event : TPairsDictionary);
     public
       constructor Create;
       procedure ProcessTag(Sender: TObject; RawTag: TRawTag);
@@ -87,31 +88,21 @@ begin
         case RawTag.ID of
           CALIBRATE_START : begin
             if Dictionary[STATE] = _TRUE_ then begin
-              if Assigned(OnStartCalibration) then begin
-                OnStartCalibration(Self, Dictionary);
-              end;
+              FOnStartCalibration(Self, Dictionary);
             end else begin
-              if Assigned(OnStopCalibration) then begin
-                OnStopCalibration(Self, Dictionary);
-              end;
+              FOnStopCalibration(Self, Dictionary);
             end;
           end;
 
           CALIBRATE_RESULT_SUMMARY : begin
-            if Assigned(OnCalibrationResultSummary) then begin
-              OnCalibrationResultSummary(Self, Dictionary);
-            end;
+            FOnCalibrationResultSummary(Self, Dictionary);
           end;
 
           RECORD_START, ENABLE_SEND_DATA : begin
             if Dictionary[STATE] = _TRUE_ then begin
-              if Assigned(OnStartRecording) then begin
-                OnStartRecording(Self, Dictionary);
-              end;
+              FOnStartRecording(Self, Dictionary);
             end else begin
-              if Assigned(OnStopRecording) then begin
-                OnStopRecording(Self, Dictionary);
-              end;
+              FOnStopRecording(Self, Dictionary);
             end;
           end;
 
@@ -131,21 +122,15 @@ begin
       try
         case RawTag.ID of
           CALIB_START_PT: begin
-            if Assigned(OnCalibrationPointStart) then begin
-              OnCalibrationPointStart(Self, Dictionary);
-            end;
+            FOnCalibrationPointStart(Self, Dictionary);
           end;
 
           CALIB_RESULT_PT: begin
-            if Assigned(OnCalibrationPointResult) then begin
-              OnCalibrationPointResult(Self, Dictionary);
-            end;
+            FOnCalibrationPointResult(Self, Dictionary);
           end;
 
           CALIB_RESULT : begin
-            if Assigned(OnCalibrationResult) then begin
-              OnCalibrationResult(Self, Dictionary);
-            end;
+            FOnCalibrationResult(Self, Dictionary);
           end;
 
           { implement more calibration events here }
@@ -162,7 +147,7 @@ begin
     REC : begin
       { implement data logger events here }
       LogLine(RawTag.Pairs);
-      OnDataReceived(Self, RawTag);
+      FOnDataReceived(Self, RawTag);
     end;
 
     NACK : begin
@@ -249,7 +234,13 @@ begin
   FOnStopRecording := AValue;
 end;
 
-procedure TOpenGazeEvents.EmptyEvent(Sender: TObject; RawTag: TRawTag);
+procedure TOpenGazeEvents.EmptyDataEvent(Sender: TObject; RawTag: TRawTag);
+begin
+  { do nothing }
+end;
+
+procedure TOpenGazeEvents.EmptyGazeEvent(Sender: TObject;
+  Event: TPairsDictionary);
 begin
   { do nothing }
 end;
@@ -257,13 +248,17 @@ end;
 constructor TOpenGazeEvents.Create;
 begin
   inherited Create;
-  OnDataReceived := @EmptyEvent;
-  FOnStartRecording := nil;
-  FOnStopRecording := nil;
-  FOnDataReceived := nil;
-  FOnStartCalibration := nil;
-  FOnCalibrationResult := nil;
-  FOnCalibrationResultSummary := nil;
+  FOnDataReceived:= @EmptyDataEvent;
+  FOnCalibrationPointResult:= @EmptyGazeEvent;
+  FOnCalibrationPointStart:= @EmptyGazeEvent;
+  FOnCalibrationResult:= @EmptyGazeEvent;
+  FOnCalibrationResultSummary:= @EmptyGazeEvent;
+  FOnDisableSendData:= @EmptyGazeEvent;
+  FOnEnableSendData:= @EmptyGazeEvent;
+  FOnStartCalibration:= @EmptyGazeEvent;
+  FOnStartRecording:= @EmptyGazeEvent;
+  FOnStopCalibration:= @EmptyGazeEvent;
+  FOnStopRecording:= @EmptyGazeEvent;
 end;
 
 destructor TOpenGazeEvents.Destroy;

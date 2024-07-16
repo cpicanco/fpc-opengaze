@@ -19,7 +19,6 @@ uses
   opengaze.socket,
   opengaze.incoming,
   opengaze.worker,
-  opengaze.worker.raw,
   opengaze.events,
   opengaze.queues;
 

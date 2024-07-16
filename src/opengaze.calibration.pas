@@ -30,17 +30,22 @@ type
   TOpenGazeCalibration = class(TOpenGazeBase)
     private
       FChoreography : TOpenGazeCalibrationChoreography;
+      FOnFailed: TNotifyEvent;
+      FOnSuccess: TNotifyEvent;
+      FOnResult : TOpenGazeEvent;
       FPoints: TOpenGazeCalibrationPoints;
-      function GetOnResult: TOpenGazeEvent;
       function GetOnResultSummary: TOpenGazeEvent;
       function GetRemote: Boolean;
       function GetStarted: Boolean;
       procedure SetChoreography(AValue: TOpenGazeCalibrationChoreography);
+      procedure SetOnFailed(AValue: TNotifyEvent);
+      procedure SetOnSuccess(AValue: TNotifyEvent);
       procedure SetOnResult(AValue: TOpenGazeEvent);
       procedure SetOnResultSummary(AValue: TOpenGazeEvent);
       procedure SetRemote(AValue: Boolean);
       procedure StartPointAnimation(Sender : TObject; Event : TPairsDictionary);
       procedure EndPointTimeout(Sender : TObject; Event : TPairsDictionary);
+      procedure DoCalibrationResult(Sender: TObject; Event : TPairsDictionary);
     public
       constructor Create(ASocket : TOpenGazeSocket; AEvents : TOpenGazeEvents);
       destructor Destroy; override;
@@ -53,8 +58,10 @@ type
       function PointDelay : string;
       function PointDuration : string;
       property Started : Boolean read GetStarted;
-      property OnResult : TOpenGazeEvent read GetOnResult write SetOnResult;
+      property OnResult : TOpenGazeEvent read FOnResult write SetOnResult;
       property OnResultSummary : TOpenGazeEvent read GetOnResultSummary write SetOnResultSummary;
+      property OnSuccess : TNotifyEvent read FOnSuccess write SetOnSuccess;
+      property OnFailed : TNotifyEvent read FOnFailed write SetOnFailed;
       property Points : TOpenGazeCalibrationPoints read FPoints;
       property Choreography : TOpenGazeCalibrationChoreography read FChoreography write SetChoreography;
       property UseCustomChoreography : Boolean read GetRemote write SetRemote;
@@ -85,12 +92,17 @@ begin
   FChoreography := AValue;
 end;
 
-function TOpenGazeCalibration.GetOnResult: TOpenGazeEvent;
+procedure TOpenGazeCalibration.SetOnFailed(AValue: TNotifyEvent);
 begin
-  Result := nil;
-  if Assigned(FEvents) then begin
-    Result := FEvents.OnCalibrationResult;
-  end;
+  if FOnFailed = AValue then Exit;
+  FOnFailed := AValue;
+end;
+
+procedure TOpenGazeCalibration.SetOnSuccess(
+  AValue: TNotifyEvent);
+begin
+  if FOnSuccess = AValue then Exit;
+  FOnSuccess := AValue;
 end;
 
 function TOpenGazeCalibration.GetOnResultSummary: TOpenGazeEvent;
@@ -155,12 +167,31 @@ begin
   end;
 end;
 
+procedure TOpenGazeCalibration.DoCalibrationResult(Sender: TObject;
+  Event: TPairsDictionary);
+begin
+  if Assigned(FOnResult) then begin
+    FOnResult(Sender, Event);
+  end;
+
+  if Assigned(FOnFailed) and
+     Assigned(FOnSuccess) then begin
+    if ResultSummary.ToFloat > 40 { pixels } then begin
+      FOnFailed(Sender);
+    end else begin
+      FOnSuccess(Sender);
+    end;
+  end;
+end;
+
 constructor TOpenGazeCalibration.Create(ASocket: TOpenGazeSocket;
   AEvents: TOpenGazeEvents);
 begin
   inherited Create(ASocket, AEvents);
   FEvents.OnCalibrationPointStart := nil;
   FEvents.OnCalibrationPointResult := nil;
+  FEvents.OnCalibrationResult := @DoCalibrationResult;
+
   FPoints := TOpenGazeCalibrationPoints.Create(ASocket, AEvents);
 
   FChoreography := OpenGazeCalibrationChoreography;

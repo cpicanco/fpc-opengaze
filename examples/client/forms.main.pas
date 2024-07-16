@@ -22,6 +22,7 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    ButtonFlush: TButton;
     ButtonHideCalibration: TButton;
     ButtonShowCalibration: TButton;
     ButtonNextScreen: TButton;
@@ -37,6 +38,7 @@ type
     PopupMenu1: TPopupMenu;
     procedure ButtonConnectClick(Sender: TObject);
     procedure ButtonDisconnectClick(Sender: TObject);
+    procedure ButtonFlushClick(Sender: TObject);
     procedure ButtonHideCalibrationClick(Sender: TObject);
     procedure ButtonNextScreenClick(Sender: TObject);
     procedure ButtonShowCalibrationClick(Sender: TObject);
@@ -44,12 +46,12 @@ type
     procedure ButtonStartRecordingClick(Sender: TObject);
     procedure ButtonStopCalibrationClick(Sender: TObject);
     procedure ButtonStopRecordingClick(Sender: TObject);
-    procedure CheckBoxUseRemoteServerChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure MenuItemSaveToFileClick(Sender: TObject);
   private
     procedure UpdateList(Sender: TObject; Event : TPairsDictionary);
-    procedure EndCalibration(Sender: TObject; Event : TPairsDictionary);
+    procedure CalibrationFailed(Sender: TObject);
+    procedure CalibrationSuccess(Sender: TObject);
   public
 
   end;
@@ -59,7 +61,7 @@ var
 
 implementation
 
-uses Math, opengaze, opengaze.logger, opengaze.helpers;
+uses opengaze, opengaze.logger, opengaze.helpers;
 
 {$R *.lfm}
 
@@ -76,6 +78,12 @@ end;
 procedure TForm1.ButtonDisconnectClick(Sender: TObject);
 begin
   OpenGazeControl.Disconnect;
+end;
+
+procedure TForm1.ButtonFlushClick(Sender: TObject);
+begin
+  ListBox1.Items.AddStrings(Data as TStrings);
+  Data.Clear;
 end;
 
 procedure TForm1.ButtonHideCalibrationClick(Sender: TObject);
@@ -114,12 +122,6 @@ end;
 procedure TForm1.ButtonStopRecordingClick(Sender: TObject);
 begin
   OpenGazeControl.Recording.Stop;
-  ListBox1.Items.AddStrings(Data as TStrings);
-end;
-
-procedure TForm1.CheckBoxUseRemoteServerChange(Sender: TObject);
-begin
-
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -131,7 +133,10 @@ begin
   //OpenGazeControl.Events.OnCalibrationPointStart := @UpdateList;
   //OpenGazeControl.Events.OnStartRecording := @UpdateList;
   //OpenGazeControl.Events.OnStopRecording := @UpdateList;
-  OpenGazeControl.Events.OnCalibrationResult := @EndCalibration;
+  OpenGazeControl.Calibration.OnResult := @UpdateList;
+  OpenGazeControl.Calibration.OnFailed := @CalibrationFailed;
+  OpenGazeControl.Calibration.OnSuccess := @CalibrationSuccess;
+  OpenGazeControl.IP := '169.254.150.247';
 end;
 
 procedure TForm1.MenuItemSaveToFileClick(Sender: TObject);
@@ -148,31 +153,21 @@ begin
   end;
 end;
 
-procedure TForm1.EndCalibration(Sender: TObject; Event: TPairsDictionary);
-var
-  CalibrationType : string;
-  ResultSummary : string;
+procedure TForm1.CalibrationFailed(Sender: TObject);
 begin
-  ResultSummary := OpenGazeControl.Calibration.ResultSummary;
-  if CheckBoxUseRemoteServer.Checked then begin
-    CalibrationType := 'Custom';
-  end else begin
-    CalibrationType := 'Gazepoint';
-  end;
-  //UpdateList(Sender, Event);
   OpenGazeControl.Calibration.Stop;
-  //OpenGazeControl.Calibration.Hide;
-  ListBox1.Items.Add(
-    CalibrationType + #9 + ResultSummary);
 
-  if ResultSummary.ToFloat > 40 then begin
-    Inc(FailedCalibrations);
-    if FailedCalibrations > 5 then begin
-      Exit;
-    end else begin
-      ButtonStartCalibrationClick(Sender);
-    end;
+  Inc(FailedCalibrations);
+  if FailedCalibrations > 4 then begin
+    Exit;
+  end else begin
+    ButtonStartCalibrationClick(Sender);
   end;
+end;
+
+procedure TForm1.CalibrationSuccess(Sender: TObject);
+begin
+  FailedCalibrations := 0;
 end;
 
 end.

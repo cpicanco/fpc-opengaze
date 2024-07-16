@@ -30,7 +30,6 @@ object Form1: TForm1
     Width = 181
     Caption = 'Using Remote Server'
     TabOrder = 10
-    OnChange = CheckBoxUseRemoteServerChange
   end
   object ButtonConnect: TButton
     Left = 5
@@ -113,6 +112,15 @@ object Form1: TForm1
     ItemHeight = 0
     PopupMenu = PopupMenu1
     TabOrder = 5
+  end
+  object ButtonFlush: TButton
+    Left = 5
+    Height = 25
+    Top = 130
+    Width = 176
+    Caption = 'Flush'
+    TabOrder = 11
+    OnClick = ButtonFlushClick
   end
   object PopupMenu1: TPopupMenu
     Left = 336

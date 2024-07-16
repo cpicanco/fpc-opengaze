@@ -74,51 +74,59 @@ constructor TOpenGazeRecording.Create(ASocket: TOpenGazeSocket; AEvents : TOpenG
 begin
   inherited Create(ASocket, AEvents);
   with Recording do begin
-    //FDisabledCommands := TStringArray.Create(
-    //  DisableSendTime,
-    //  DisableSendPupilLeft,
-    //  DisableSendPupilRight,
-    //  DisableSend3DEyeLeft,
-    //  DisableSend3DEyeRight,
-    //  DisableSendCursor,
-    //  DisableSendBlink,
-    //  DisableSendUserData);
-
-    SetLength(FDisabledCommands, 0);
-
+    // Enable all
+    // SetLength(FDisabledCommands, 0);
     //FEnabledCommands := TStringArray.Create(
     //  EnableSendCounter,
+    //  EnableSendTime,
     //  EnableSendTimeTick,
     //  EnableSendPointOfGazeFixation,
     //  EnableSendPointOfGazeLeft,
     //  EnableSendPointOfGazeRight,
-    //  EnableSendPointOfGazeBest);
+    //  EnableSendPointOfGazeBest,
+    //  EnableSendAssistiveCommunicationPointOfGaze,
+    //  EnableSendPupilLeft,
+    //  EnableSendPupilRight,
+    //  EnableSend3DEyeLeft,
+    //  EnableSend3DEyeRight,
+    //  EnableSendCursor,
+    //  EnableSendKeyboardInput,
+    //  EnableSendBlink,
+    //  EnableSendDial,
+    //  EnableSendGalvanicSkinResponse,
+    //  EnableSendHeartRate,
+    //  EnableSendHeartRatePulse,
+    //  EnableSendHeartBeatInterbeatInterval,
+    //  EnableSendTransistorTransistorLogicInputOutput,
+    //  EnableSendPupilInMillimeters,
+    //  EnableSendUserData);
+
+    FDisabledCommands := TStringArray.Create(
+      DisableSendTime,
+      DisableSendAssistiveCommunicationPointOfGaze,
+      DisableSendPupilLeft,
+      DisableSendPupilRight,
+      DisableSend3DEyeLeft,
+      DisableSend3DEyeRight,
+      DisableSendCursor,
+      DisableSendKeyboardInput,
+      DisableSendBlink,
+      DisableSendDial,
+      DisableSendGalvanicSkinResponse,
+      DisableSendHeartRate,
+      DisableSendHeartRatePulse,
+      DisableSendHeartBeatInterbeatInterval,
+      DisableSendTransistorTransistorLogicInputOutput,
+      DisableSendPupilInMillimeters,
+      DisableSendUserData);
 
     FEnabledCommands := TStringArray.Create(
       EnableSendCounter,
-      EnableSendTime,
       EnableSendTimeTick,
       EnableSendPointOfGazeFixation,
       EnableSendPointOfGazeLeft,
       EnableSendPointOfGazeRight,
-      EnableSendPointOfGazeBest,
-      EnableSendAssistiveCommunicationPointOfGaze,
-      EnableSendPupilLeft,
-      EnableSendPupilRight,
-      EnableSend3DEyeLeft,
-      EnableSend3DEyeRight,
-      EnableSendCursor,
-      EnableSendKeyboardInput,
-      EnableSendBlink,
-      EnableSendDial,
-      EnableSendGalvanicSkinResponse,
-      EnableSendHeartRate,
-      EnableSendHeartRatePulse,
-      EnableSendHeartBeatInterbeatInterval,
-      EnableSendTransistorTransistorLogicInputOutput,
-      EnableSendPupilInMillimeters,
-      EnableSendUserData
-      );
+      EnableSendPointOfGazeBest);
   end;
 end;
 

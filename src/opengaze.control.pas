@@ -29,6 +29,8 @@ type
   private
     FCalibration : TOpenGazeCalibration;
     FRecording   : TOpenGazeRecording;
+    function GetIP: string;
+    procedure SetIP(AValue: string);
   public
     constructor Create;
     destructor Destroy; override;
@@ -36,10 +38,23 @@ type
     property Events : TOpenGazeEvents read FEvents;
     property Calibration : TOpenGazeCalibration read FCalibration;
     property Recording : TOpenGazeRecording read FRecording;
+    property IP : string read GetIP write SetIP;
   end;
 
 
 implementation
+
+function TOpenGazeControlClient.GetIP: string;
+begin
+  Result := FSocket.IP;
+end;
+
+procedure TOpenGazeControlClient.SetIP(AValue: string);
+begin
+  if FSocket.Connected then Exit;
+  if FSocket.IP = AValue then Exit;
+  FSocket.IP := AValue;
+end;
 
 constructor TOpenGazeControlClient.Create;
 begin

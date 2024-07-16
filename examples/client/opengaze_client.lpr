@@ -23,7 +23,7 @@ uses
   {$IFDEF DEBUG}
   windows.debugger,
   {$ENDIF}
-  forms, forms.main, opengaze.worker.raw;
+  forms, forms.main;
 
 {$R *.res}
 
