@@ -34,6 +34,7 @@ type
     FLastBlockedCommand: string;
     function GetConnected: Boolean;
     function GetIsBlocked: Boolean;
+    function GetIsLocal: Boolean;
     procedure SeTOpenGazeServer(AValue: TOpenGazeServer);
     procedure SetIsBlocked(AValue: Boolean);
     function Block(TimeOut : integer) : TWaitResult;
@@ -48,6 +49,7 @@ type
       Timeout : Integer = MaxInt); overload;
     function Receive(Timeout: Integer = MaxInt): string;
     property IP: string read FIP write FIP;
+    property IsLocal : Boolean read GetIsLocal;
     property Port: string read FPort write FPort;
     property Lock: TCriticalSection read FLock;
     property Event: TEvent read FEvent write FEvent;
@@ -82,6 +84,11 @@ begin
   finally
     FLock.Release;
   end;
+end;
+
+function TOpenGazeSocket.GetIsLocal: Boolean;
+begin
+  Result := FIP = '127.0.0.1';
 end;
 
 procedure TOpenGazeSocket.SeTOpenGazeServer(AValue: TOpenGazeServer);

@@ -39,6 +39,7 @@ type
     destructor Destroy; override;
     procedure Connect;
     procedure Disconnect;
+    function Connected : Boolean;
     property Events : TOpenGazeEvents read FEvents;
   end;
 
@@ -113,6 +114,11 @@ begin
     FIncomingThread := nil;
   end;
   FSocket.Disconnect;
+end;
+
+function TOpenGazeBaseClient.Connected: Boolean;
+begin
+  Result := FSocket.Connected;
 end;
 
 end.

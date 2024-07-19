@@ -19,7 +19,8 @@ uses
   opengaze.constants,
   opengaze.types,
   opengaze.socket,
-  opengaze.events;
+  opengaze.events,
+  opengaze.logger.gaze;
 
 type
 
@@ -27,9 +28,10 @@ type
 
   TOpenGazeRecording = class(TOpenGazeBase)
     private
+      FLogger : TOpenGazeLogger;
       FDisabledCommands: TStringArray;
       FEnabledCommands: TStringArray;
-      FOnDataReceived: TGazeDataEvent;
+      function GetOnDataReceived: TGazeDataEvent;
       procedure SetDisabledCommands(AValue: TStringArray);
       procedure SetEnabledCommands(AValue: TStringArray);
       procedure SetOnDataReceived(AValue: TGazeDataEvent);
@@ -42,26 +44,28 @@ type
       destructor Destroy; override;
       procedure Start(Blocking : Boolean = True);
       procedure Stop(Blocking : Boolean = True);
+      procedure SetupDataFile(AFilename : string);
       property EnabledCommands : TStringArray read FEnabledCommands write SetEnabledCommands;
       property DisabledCommands : TStringArray read FDisabledCommands write SetDisabledCommands;
+      property OnDataReceived : TGazeDataEvent read GetOnDataReceived write SetOnDataReceived;
   end;
 
 implementation
 
-uses opengaze.commands, opengaze.logger;
+uses opengaze.commands;
 
 { TOpenGazeRecording }
-
-procedure TOpenGazeRecording.SetOnDataReceived(AValue: TGazeDataEvent);
-begin
-  if FOnDataReceived = AValue then Exit;
-  FOnDataReceived := AValue;
-end;
 
 procedure TOpenGazeRecording.SetEnabledCommands(AValue: TStringArray);
 begin
   if FEnabledCommands = AValue then Exit;
   FEnabledCommands := AValue;
+end;
+
+procedure TOpenGazeRecording.SetOnDataReceived(AValue: TGazeDataEvent);
+begin
+  if FLogger.OnDataReceived = AValue then Exit;
+  FLogger.OnDataReceived := AValue;
 end;
 
 procedure TOpenGazeRecording.SetDisabledCommands(AValue: TStringArray);
@@ -70,9 +74,15 @@ begin
   FDisabledCommands := AValue;
 end;
 
+function TOpenGazeRecording.GetOnDataReceived: TGazeDataEvent;
+begin
+  Result := FLogger.OnDataReceived;
+end;
+
 constructor TOpenGazeRecording.Create(ASocket: TOpenGazeSocket; AEvents : TOpenGazeEvents);
 begin
   inherited Create(ASocket, AEvents);
+  FLogger := TOpenGazeLogger.Create(AEvents);
   with Recording do begin
     // Enable all
     // SetLength(FDisabledCommands, 0);
@@ -132,6 +142,7 @@ end;
 
 destructor TOpenGazeRecording.Destroy;
 begin
+  FLogger.Free;
   inherited Destroy;
 end;
 
@@ -176,15 +187,19 @@ end;
 procedure TOpenGazeRecording.Start(Blocking: Boolean);
 begin
   ParseSendCommands;
-  DataHeader := GetDataHeader;
-  BeginUpdateData;
+  FLogger.BeginUpdateData;
   Send(True, Blocking);
 end;
 
 procedure TOpenGazeRecording.Stop(Blocking: Boolean);
 begin
   Send(False, Blocking);
-  EndUpdateData;
+  FLogger.EndUpdateData;
+end;
+
+procedure TOpenGazeRecording.SetupDataFile(AFilename: string);
+begin
+  FLogger.Filename := AFilename + '.gaze';
 end;
 
 end.

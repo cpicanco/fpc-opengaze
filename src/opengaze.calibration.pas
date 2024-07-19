@@ -29,6 +29,7 @@ type
   // A wrapper around outgoing calibration messages
   TOpenGazeCalibration = class(TOpenGazeBase)
     private
+      FLoggerAlive : Boolean;
       FChoreography : TOpenGazeCalibrationChoreography;
       FOnFailed: TNotifyEvent;
       FOnSuccess: TNotifyEvent;
@@ -54,6 +55,10 @@ type
       procedure Start(Blocking : Boolean = True);
       procedure Stop(Blocking : Boolean = True);
       procedure SelectNextScreen;
+      procedure SetScreen(AX, AY, AW, AH : integer);
+      procedure SetupDataFile(AFilename : string);
+      procedure StartLogger;
+      procedure StopLogger;
       function ResultSummary : string;
       function PointDelay : string;
       function PointDuration : string;
@@ -69,7 +74,12 @@ type
 
 implementation
 
-uses opengaze.constants, opengaze.commands, opengaze.helpers, choreographies;
+uses
+  opengaze.constants,
+  opengaze.commands,
+  opengaze.helpers,
+  opengaze.logger.calibration,
+  choreographies;
 
 { TOpenGazeCalibration }
 
@@ -170,6 +180,10 @@ end;
 procedure TOpenGazeCalibration.DoCalibrationResult(Sender: TObject;
   Event: TPairsDictionary);
 begin
+  if FLoggerAlive then begin
+    LogLine(Event);
+  end;
+
   if Assigned(FOnResult) then begin
     FOnResult(Sender, Event);
   end;
@@ -188,6 +202,7 @@ constructor TOpenGazeCalibration.Create(ASocket: TOpenGazeSocket;
   AEvents: TOpenGazeEvents);
 begin
   inherited Create(ASocket, AEvents);
+  FLoggerAlive := False;
   FEvents.OnCalibrationPointStart := nil;
   FEvents.OnCalibrationPointResult := nil;
   FEvents.OnCalibrationResult := @DoCalibrationResult;
@@ -221,6 +236,10 @@ begin
     NormalizedPoints := FChoreography.GetPoints;
     for Point in NormalizedPoints do begin
       Points.Add(Point.X, Point.Y);
+    end;
+
+    if FLoggerAlive then begin
+      LogLine(NormalizedPoints);
     end;
 
     FChoreography.Show;
@@ -258,6 +277,31 @@ begin
   with Choreography.BoundsRect do begin
     SendCommand(Calibration.SetScreenSize(Left, Top, Width, Height));
   end;
+end;
+
+procedure TOpenGazeCalibration.SetScreen(AX, AY, AW, AH: integer);
+begin
+  Choreography.SetScreen(AX, AY, AW, AH);
+  with Choreography.BoundsRect do begin
+    SendCommand(Calibration.SetScreenSize(Left, Top, Width, Height));
+  end;
+end;
+
+procedure TOpenGazeCalibration.SetupDataFile(AFilename: string);
+begin
+  DataFilename := AFilename + '.gaze.calibration';
+end;
+
+procedure TOpenGazeCalibration.StartLogger;
+begin
+  BeginUpdateData;
+  FLoggerAlive := True;
+end;
+
+procedure TOpenGazeCalibration.StopLogger;
+begin
+  FLoggerAlive := False;
+  EndUpdateData;
 end;
 
 function TOpenGazeCalibration.ResultSummary: string;

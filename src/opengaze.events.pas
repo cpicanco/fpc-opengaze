@@ -71,7 +71,7 @@ type
 
 implementation
 
-uses OpenGaze.commands, OpenGaze.parser, OpenGaze.logger;
+uses opengaze.commands, opengaze.parser;
 
 { TOpenGazeEvents }
 
@@ -146,7 +146,6 @@ begin
 
     REC : begin
       { implement data logger events here }
-      LogLine(RawTag.Pairs);
       FOnDataReceived(Self, RawTag);
     end;
 

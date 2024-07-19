@@ -44,6 +44,7 @@ type
     procedure Start;
     procedure Stop;
     procedure SetPoints(NormalizedPoints : TNormalizedPoints);
+    procedure SetScreen(AX, AY, AW, AH : integer);
     function GetPoints(AN: integer = 3;
       Coreography: TCoreography = nil): TNormalizedPoints;
     property Animation : TAnimation read FAnimation;
@@ -173,6 +174,11 @@ begin
       Point.X.Denormalize(Width),
       Point.Y.Denormalize(Height));
   end;
+end;
+
+procedure TCalibrationChoreography.SetScreen(AX, AY, AW, AH: integer);
+begin
+  FBackground.BoundsRect := Rect(AX, AY, AX+AW, AY+AH);
 end;
 
 initialization
