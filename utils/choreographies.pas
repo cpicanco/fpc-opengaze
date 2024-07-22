@@ -98,6 +98,7 @@ end;
 procedure TCalibrationChoreography.Show;
 begin
   FBackground.Show;
+  FAnimation.StartOnSet;
 end;
 
 procedure TCalibrationChoreography.Hide;

@@ -31,6 +31,7 @@ type
     FEvents : TOpenGazeEvents;
     procedure SendCommand(Command: string; Blocking : Boolean = True);
     function RequestCommand(Command: string) : TPairsDictionary;
+    function RequestKey(Command: string; Key: string): string;
   public
     constructor Create(ASocket: TOpenGazeSocket; AEvents: TOpenGazeEvents);
     property Socket : TOpenGazeSocket read FSocket;
@@ -70,6 +71,18 @@ begin
   FSocket.Request(Command, Reply);
   FEvents.ProcessTag(Self, Reply);
   Result := TagPairsToDict(Reply.Pairs);
+end;
+
+function TOpenGazeBase.RequestKey(Command: string; Key: string): string;
+var
+  Dictionary : TPairsDictionary;
+begin
+  Dictionary := RequestCommand(Command);
+  try
+    Result := Dictionary[Key];
+  finally
+    Dictionary.Free;
+  end;
 end;
 
 constructor TOpenGazeBase.Create(ASocket: TOpenGazeSocket;

@@ -21,7 +21,7 @@ type
 
   TProcedureOfObject = procedure of object;
 
-  TPaintingState = (Waiting, PaintingPointDelay, PaintingPointDuration);
+  TPaintingState = (Waiting, PaintingOnset, PaintingPointDelay, PaintingPointDuration);
 
   { TAnimation }
 
@@ -66,6 +66,7 @@ type
       procedure PaintBackPoint(X, Y : Integer);
       procedure Reset;
       procedure SetSize(Width, Height : Integer);
+      procedure StartOnSet;
       procedure StartPointDuration;
       procedure StartPointAnimation;
       procedure EndPointTimeout;
@@ -192,6 +193,10 @@ begin
       DrawGaze;
     end;
 
+    PaintingOnset : begin
+      DrawCalibrationPoint(clRed);
+    end;
+
     PaintingPointDelay : begin
       DrawCalibrationPoint(clBlack);
     end;
@@ -311,6 +316,14 @@ begin
   FBitmap.SetSize(Width, Height);
   FBitmapBack.SetSize(Width, Height);
   ClearBackground;
+end;
+
+procedure TAnimation.StartOnSet;
+begin
+  FIndex := Low(FTargets);
+  FTargetA := FTargets[FIndex];
+  FState := PaintingOnset;
+  Paint;
 end;
 
 procedure TAnimation.StartPointAnimation;
