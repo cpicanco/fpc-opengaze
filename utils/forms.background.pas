@@ -79,6 +79,7 @@ begin
   Color := 0;
   Width := Screen.Width;
   Height := Screen.Height;
+  Cursor := -1;
 
   FForm := TForm.CreateNew(nil);
   FForm.Width := Screen.Width;

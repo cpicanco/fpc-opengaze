@@ -12,7 +12,6 @@
       <XPManifest>
         <DpiAware Value="True"/>
       </XPManifest>
-      <Icon Value="0"/>
     </General>
     <BuildModes>
       <Item Name="Debug" Default="True"/>
@@ -123,9 +122,6 @@
     </Linking>
     <Other>
       <CustomOptions Value="-dDEBUG"/>
-      <OtherDefines Count="1">
-        <Define0 Value="DEBUG"/>
-      </OtherDefines>
     </Other>
   </CompilerOptions>
   <Debugging>

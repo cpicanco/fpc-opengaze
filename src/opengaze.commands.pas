@@ -98,6 +98,19 @@ type
     function DisableSendUserData : string;
   end;
 
+  // read only
+
+  { TInformationCommands }
+
+  TInformationCommands = record
+    function TimeTickFrequency : string;
+    function CameraSize : string;
+    function ProductID : string;
+    function SerialID : string;
+    function CompanyID : string;
+    function APIID : string;
+  end;
+
   { TRecordingCommandsOpenGazeAnalysis }
 
   TRecordingCommandsOpenGazeAnalysis = record
@@ -111,6 +124,7 @@ type
 var
   Calibration : TCalibrationCommands;
   Recording : TRecordingCommands;
+  Information : TInformationCommands;
   RecordingOpenGazeAnalysis : TRecordingCommandsOpenGazeAnalysis;
 
 implementation
@@ -284,12 +298,12 @@ end;
 
 function TCalibrationCommands.SetReset: string;
 begin
-  Result := ParseStr(CLIENT_GET, CALIBRATE_RESET, []);
+  Result := ParseStr(CLIENT_SET, CALIBRATE_RESET, []);
 end;
 
 function TCalibrationCommands.GetReset: string;
 begin
-  Result := ParseStr(CLIENT_SET, CALIBRATE_RESET, []);
+  Result := ParseStr(CLIENT_GET, CALIBRATE_RESET, []);
 end;
 
 function TCalibrationCommands.AddPoint(X, Y: Float): string;
@@ -615,6 +629,38 @@ function TRecordingCommands.DisableSendUserData: string;
 begin
   Result := ParseStr(CLIENT_SET, ENABLE_SEND_USER_DATA, False.ToStateArray);
   EnabledSendDataCommands := EnabledSendDataCommands-[TOpenGazeID.ENABLE_SEND_USER_DATA];
+end;
+
+{ TInformationCommands }
+
+function TInformationCommands.TimeTickFrequency: string;
+begin
+  Result := ParseStr(CLIENT_GET, TIME_TICK_FREQUENCY, []);
+end;
+
+function TInformationCommands.CameraSize: string;
+begin
+  Result := ParseStr(CLIENT_GET, CAMERA_SIZE, []);
+end;
+
+function TInformationCommands.ProductID: string;
+begin
+  Result := ParseStr(CLIENT_GET, PRODUCT_ID, []);
+end;
+
+function TInformationCommands.SerialID: string;
+begin
+  Result := ParseStr(CLIENT_GET, SERIAL_ID, []);
+end;
+
+function TInformationCommands.CompanyID: string;
+begin
+  Result := ParseStr(CLIENT_GET, COMPANY_ID, []);
+end;
+
+function TInformationCommands.APIID: string;
+begin
+  Result := ParseStr(CLIENT_GET, API_ID, []);
 end;
 
 { TRecordingCommandsOpenGazeAnalysis }

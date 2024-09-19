@@ -50,8 +50,11 @@ const
   CALX = 'CALX'; // Parameter type: Numeric
   CALY = 'CALY'; // Parameter type: Numeric
   PTS = 'PTS'; // Parameter type: Numeric
+  FREQ = 'FREQ';
   XCOORDENATE = 'X';
   YCOORDENATE = 'Y';
+  CAMERA_WIDTH = 'WIDTH';
+  CAMERA_HEIGHT = 'HEIGHT';
   SCREEN_WIDTH = 'WIDTH';
   SCREEN_HEIGHT = 'HEIGHT';
   AVE_ERROR = 'AVE_ERROR';  // Parameter type: Numeric

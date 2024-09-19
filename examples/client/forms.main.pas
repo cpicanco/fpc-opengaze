@@ -32,7 +32,9 @@ type
     ButtonStartRecording: TButton;
     ButtonStopRecording: TButton;
     ButtonStartCalibration: TButton;
+    CheckBoxUseCustomCalibration: TCheckBox;
     CheckBoxUseRemoteServer: TCheckBox;
+    EditIP: TEdit;
     ListBox1: TListBox;
     MenuItemSaveToFile: TMenuItem;
     PopupMenu1: TPopupMenu;
@@ -46,6 +48,7 @@ type
     procedure ButtonStartRecordingClick(Sender: TObject);
     procedure ButtonStopCalibrationClick(Sender: TObject);
     procedure ButtonStopRecordingClick(Sender: TObject);
+    procedure CheckBoxUseRemoteServerChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure MenuItemSaveToFileClick(Sender: TObject);
   private
@@ -104,39 +107,46 @@ end;
 procedure TForm1.ButtonStartCalibrationClick(Sender: TObject);
 begin
   OpenGazeControl.Calibration.UseCustomChoreography :=
-    CheckBoxUseRemoteServer.Checked;
-  OpenGazeControl.Calibration.Show;
-  OpenGazeControl.Calibration.Start;
+    CheckBoxUseCustomCalibration.Checked;
+  OpenGazeControl.IP := EditIP.Text;
+
+  OpenGazeControl.StartCalibration;
 end;
 
 procedure TForm1.ButtonStartRecordingClick(Sender: TObject);
 begin
-  OpenGazeControl.Recording.Start;
+  OpenGazeControl.StartRecording;
 end;
 
 procedure TForm1.ButtonStopCalibrationClick(Sender: TObject);
 begin
-  OpenGazeControl.Calibration.Stop;
+  OpenGazeControl.StopCalibration;
 end;
 
 procedure TForm1.ButtonStopRecordingClick(Sender: TObject);
 begin
-  OpenGazeControl.Recording.Stop;
+  OpenGazeControl.StopRecording;
+end;
+
+procedure TForm1.CheckBoxUseRemoteServerChange(Sender: TObject);
+begin
+  if CheckBoxUseRemoteServer.Checked then begin
+    //EditIP.Text := '169.254.150.247';
+    CheckBoxUseCustomCalibration.Checked := True;
+    CheckBoxUseCustomCalibration.Enabled := False;
+    EditIP.Enabled := True;
+  end else begin
+    CheckBoxUseCustomCalibration.Enabled := True;
+    EditIP.Text := '127.0.0.1';
+    EditIP.Enabled := False;
+  end;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  //OpenGazeControl.Events.OnStartCalibration := @UpdateList;
-  //OpenGazeControl.Events.OnEnableSendData := @UpdateList;
-  //OpenGazeControl.Events.OnDisableSendData := @UpdateList;
-  //OpenGazeControl.Events.OnCalibrationPointResult := @UpdateList;
-  //OpenGazeControl.Events.OnCalibrationPointStart := @UpdateList;
-  //OpenGazeControl.Events.OnStartRecording := @UpdateList;
-  //OpenGazeControl.Events.OnStopRecording := @UpdateList;
   OpenGazeControl.Calibration.OnResult := @UpdateList;
   OpenGazeControl.Calibration.OnFailed := @CalibrationFailed;
   OpenGazeControl.Calibration.OnSuccess := @CalibrationSuccess;
-  OpenGazeControl.IP := '169.254.150.247';
 end;
 
 procedure TForm1.MenuItemSaveToFileClick(Sender: TObject);
@@ -155,10 +165,12 @@ end;
 
 procedure TForm1.CalibrationFailed(Sender: TObject);
 begin
-  OpenGazeControl.Calibration.Stop;
+  if OpenGazeControl.Calibration.UseCustomChoreography then begin
+    OpenGazeControl.StopCalibration;
+  end;
 
   Inc(FailedCalibrations);
-  if FailedCalibrations > 4 then begin
+  if FailedCalibrations > 2 then begin
     Exit;
   end else begin
     ButtonStartCalibrationClick(Sender);

@@ -26,6 +26,7 @@ type
     function ToValueArray : TStringArray;
     function ToXArray : TStringArray;
     function ToYArray : TStringArray;
+    function ToDefaultString : string;
   end;
 
   { TBooleanOpenGazeHelper }
@@ -74,6 +75,11 @@ end;
 function TFloatOpenGazeHelper.ToYArray: TStringArray;
 begin
   Result := [YCOORDENATE, Self.ToString(FormatSettings)];
+end;
+
+function TFloatOpenGazeHelper.ToDefaultString: string;
+begin
+  Result := Self.ToString(FormatSettings);
 end;
 
 { TBooleanOpenGazeHelper }
