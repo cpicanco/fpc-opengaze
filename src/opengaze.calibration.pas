@@ -50,6 +50,7 @@ type
       procedure StartPointAnimation(Sender : TObject; Event : TPairsDictionary);
       procedure EndPointTimeout(Sender : TObject; Event : TPairsDictionary);
       procedure DoCalibrationResult(Sender: TObject; Event : TPairsDictionary);
+      procedure DoNothing(Sender: TObject; Event : TPairsDictionary);
     public
       constructor Create(ASocket : TOpenGazeSocket; AEvents : TOpenGazeEvents);
       destructor Destroy; override;
@@ -133,9 +134,8 @@ end;
 
 procedure TOpenGazeCalibration.SetOnResult(AValue: TOpenGazeEvent);
 begin
-  if FEvents = nil then Exit;
-  if FEvents.OnCalibrationResult = AValue then Exit;
-  FEvents.OnCalibrationResult := AValue;
+  if FOnResult = AValue then Exit;
+  FOnResult := AValue;
 end;
 
 procedure TOpenGazeCalibration.SetOnResultSummary(AValue: TOpenGazeEvent);
@@ -201,14 +201,20 @@ begin
   end;
 end;
 
+procedure TOpenGazeCalibration.DoNothing(Sender: TObject;
+  Event: TPairsDictionary);
+begin
+  { do nothing }
+end;
+
 constructor TOpenGazeCalibration.Create(ASocket: TOpenGazeSocket;
   AEvents: TOpenGazeEvents);
 begin
   inherited Create(ASocket, AEvents);
   FBlocking := True;
   FLoggerAlive := False;
-  FEvents.OnCalibrationPointStart := nil;
-  FEvents.OnCalibrationPointResult := nil;
+  FEvents.OnCalibrationPointStart := @DoNothing;
+  FEvents.OnCalibrationPointResult := @DoNothing;
   FEvents.OnCalibrationResult := @DoCalibrationResult;
 
   FPoints := TOpenGazeCalibrationPoints.Create(ASocket, AEvents);
