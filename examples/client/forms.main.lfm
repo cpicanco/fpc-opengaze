@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 745
+  Left = 808
   Height = 491
-  Top = 132
+  Top = 140
   Width = 372
   Caption = 'Form1'
   ChildSizing.LeftRightSpacing = 5
@@ -14,37 +14,39 @@ object Form1: TForm1
   ClientWidth = 372
   LCLVersion = '3.99.0.0'
   OnCreate = FormCreate
-  object ButtonNextScreen: TButton
-    Left = 5
-    Height = 25
-    Top = 5
-    Width = 176
-    Caption = 'Select Next Screen'
-    TabOrder = 7
-    OnClick = ButtonNextScreenClick
-  end
   object CheckBoxUseRemoteServer: TCheckBox
-    Left = 186
-    Height = 25
+    Left = 5
+    Height = 23
     Top = 5
-    Width = 181
-    Caption = 'Using Remote Server'
+    Width = 192
+    Caption = 'Use Remote Server'
     TabOrder = 10
+    OnChange = CheckBoxUseRemoteServerChange
+  end
+  object EditIP: TEdit
+    Left = 202
+    Height = 23
+    Top = 5
+    Width = 165
+    Enabled = False
+    TabOrder = 12
+    Text = '127.0.0.1'
+    TextHint = 'IP'
   end
   object ButtonConnect: TButton
     Left = 5
     Height = 25
-    Top = 30
-    Width = 176
+    Top = 28
+    Width = 192
     Caption = 'Connect'
     TabOrder = 0
     OnClick = ButtonConnectClick
   end
   object ButtonDisconnect: TButton
-    Left = 186
+    Left = 202
     Height = 25
-    Top = 30
-    Width = 181
+    Top = 28
+    Width = 165
     Caption = 'Disconnect'
     TabOrder = 1
     OnClick = ButtonDisconnectClick
@@ -52,17 +54,17 @@ object Form1: TForm1
   object ButtonStartRecording: TButton
     Left = 5
     Height = 25
-    Top = 55
-    Width = 176
+    Top = 53
+    Width = 192
     Caption = 'Start Recording'
     TabOrder = 2
     OnClick = ButtonStartRecordingClick
   end
   object ButtonStopRecording: TButton
-    Left = 186
+    Left = 202
     Height = 25
-    Top = 55
-    Width = 181
+    Top = 53
+    Width = 165
     Caption = 'Stop Recording'
     TabOrder = 3
     OnClick = ButtonStopRecordingClick
@@ -70,17 +72,17 @@ object Form1: TForm1
   object ButtonShowCalibration: TButton
     Left = 5
     Height = 25
-    Top = 80
-    Width = 176
+    Top = 78
+    Width = 192
     Caption = 'Show Calibration'
     TabOrder = 8
     OnClick = ButtonShowCalibrationClick
   end
   object ButtonHideCalibration: TButton
-    Left = 186
+    Left = 202
     Height = 25
-    Top = 80
-    Width = 181
+    Top = 78
+    Width = 165
     Caption = 'Hide Calibration'
     TabOrder = 9
     OnClick = ButtonHideCalibrationClick
@@ -88,25 +90,25 @@ object Form1: TForm1
   object ButtonStartCalibration: TButton
     Left = 5
     Height = 25
-    Top = 105
-    Width = 176
+    Top = 103
+    Width = 192
     Caption = 'Start Calibration'
     TabOrder = 4
     OnClick = ButtonStartCalibrationClick
   end
   object ButtonStopCalibration: TButton
-    Left = 186
+    Left = 202
     Height = 25
-    Top = 105
-    Width = 181
+    Top = 103
+    Width = 165
     Caption = 'Stop Calibration'
     TabOrder = 6
     OnClick = ButtonStopCalibrationClick
   end
   object ListBox1: TListBox
     Left = 5
-    Height = 332
-    Top = 154
+    Height = 278
+    Top = 208
     Width = 362
     Align = alBottom
     ItemHeight = 0
@@ -116,15 +118,34 @@ object Form1: TForm1
   object ButtonFlush: TButton
     Left = 5
     Height = 25
-    Top = 130
-    Width = 176
-    Caption = 'Flush'
+    Top = 128
+    Width = 192
+    Caption = 'Flush Received Data'
     TabOrder = 11
     OnClick = ButtonFlushClick
   end
+  object ButtonNextScreen: TButton
+    Left = 202
+    Height = 25
+    Top = 128
+    Width = 165
+    Caption = 'Select Next Screen'
+    TabOrder = 7
+    OnClick = ButtonNextScreenClick
+  end
+  object CheckBoxUseCustomCalibration: TCheckBox
+    Left = 5
+    Height = 19
+    Top = 153
+    Width = 192
+    Caption = 'Use Custom Calibration'
+    Checked = True
+    State = cbChecked
+    TabOrder = 13
+  end
   object PopupMenu1: TPopupMenu
-    Left = 336
-    Top = 104
+    Left = 320
+    Top = 192
     object MenuItemSaveToFile: TMenuItem
       Caption = 'Save To File'
       OnClick = MenuItemSaveToFileClick
